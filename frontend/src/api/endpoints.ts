@@ -12,5 +12,7 @@ export const endpoints = {
   projects: {
     list: "/projects",
     byId: (id: string) => `/projects/${id}`,
+    predictProfit: "/projects/predict_profit",
+    predictShip: "/projects/predict_ship",
   },
 };

@@ -1,9 +1,10 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/base/base.entity';
 import { ProjectCategory } from '../../project-category/entities/project-category.entity';
 import { ProjectTechnology } from '../../project-technology/entities/project-technology.entity';
 import { Task } from '../../task/entities/task.entity';
 import { ProjectStatus } from '../constants';
+import { User } from '../../user/entities/user.entity';
 
 @Entity('projects')
 export class Project extends BaseEntity {
@@ -27,6 +28,15 @@ export class Project extends BaseEntity {
 
   @Column({ type: 'date', nullable: true })
   dueDate: Date;
+
+  @Column({ type: 'uuid', nullable: true })
+  executorId: string;
+
+  @OneToOne(() => User, user => user.id)
+  owner: User;
+
+  @OneToOne(() => User, user => user.id, { nullable: true })
+  executor: User;
 
   @OneToMany(() => Task, task => task.project)
   tasks: Task[];

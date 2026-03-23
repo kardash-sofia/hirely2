@@ -13,6 +13,7 @@ import {
   ProjectListItemDto,
   ProjectWithCategories,
 } from './dto/get-projects.dto';
+import { PredictProfitDto, PredictShipDto } from './dto/prediction.dto';
 
 const hardcodedOwner = {
   id: '098d10c2-b014-4a3d-b650-2fe4ee453785',
@@ -23,6 +24,38 @@ const hardcodedOwner = {
 @Injectable()
 export class ProjectService {
   constructor(private readonly dataSource: DataSource) {}
+
+  async predictProfit(dto: PredictProfitDto) {
+    const response = await fetch(`${process.env.PREDICTION_URL}/predict_profit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dto),
+    });
+
+    const data = await response.json();
+
+    console.log('Received response from prediction service:', data);
+
+    return data;
+  }
+
+  async predictShip(dto: PredictShipDto) {
+    const response = await fetch(`${process.env.PREDICTION_URL}/predict_ship`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dto),
+    });
+
+    const data = await response.json();
+
+    console.log('Received response from prediction service:', data);
+
+    return data;
+  }
 
   async getProjects(query: GetProjectsQueryDto) {
     const { limit = 10, offset = 0, status, categories } = query;

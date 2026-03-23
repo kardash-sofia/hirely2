@@ -12,8 +12,8 @@ export const typeOrmConfig: DataSourceOptions = {
   password: process.env.PROJECT_DB_PASSWORD,
   database: process.env.PROJECT_DB_NAME,
 
-  entities: ['dist/**/*.entity.js'],
-  migrations: ['dist/infrastructure/database/migrations/*.js'],
+  entities: [path.join(__dirname, '../../**/*.entity{.ts,.js}')],
+  migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
 
   synchronize: false,
 };
