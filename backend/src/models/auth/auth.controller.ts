@@ -10,13 +10,11 @@ export class AuthController {
 
   @Post('register')
   register(@Body() dto: RegisterDto) {
-    console.log('Registering:', dto);
-    return this.authService.register(dto.email, dto.password);
+    return this.authService.register(dto.email, dto.password, dto.fullName, dto.role);
   }
 
   @Post('login')
   login(@Body() dto: LoginDto) {
-    console.log('Logging in:', dto);
     return this.authService.login(dto.email, dto.password);
   }
 

@@ -2,40 +2,62 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { AuthUser } from './entities/auth.entity';
+import { UserService } from '../user/user.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { Roles } from '../user/constants';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private userService: UserService,
+  ) {}
 
-  async register(email: string, password: string) {
+  async register(email: string, password: string, fullName: string, role: string) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new AuthUser();
-    user.email = email;
-    user.password_hash = hashedPassword;
+    const authUser = new AuthUser();
+    authUser.email = email;
+    authUser.password_hash = hashedPassword;
+
+    await authUser.save();
+
+    const user = await this.userService.create({
+      authUserId: authUser.id,
+      fullName: fullName,
+      role: role as Roles,
+    } as CreateUserDto);
 
     await user.save();
 
-    return { id: user.id, email: user.email };
+    return { success: true, message: 'User registered successfully' };
   }
 
   async login(email: string, password: string) {
-    const user = await AuthUser.findOne({ where: { email } });
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    const authUser = await AuthUser.findOne({ where: { email } });
+    if (!authUser) throw new UnauthorizedException('Invalid credentials');
 
-    const passwordMatches = await bcrypt.compare(password, user.password_hash);
+    const passwordMatches = await bcrypt.compare(password, authUser.password_hash);
     if (!passwordMatches) throw new UnauthorizedException('Invalid credentials');
 
-    const accessToken = this.jwtService.sign({ sub: user.id });
+    const accessToken = this.jwtService.sign({ sub: authUser.id });
     const refreshToken = this.jwtService.sign(
-      { sub: user.id },
+      { sub: authUser.id },
       { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
     );
 
-    user.refresh_token = await bcrypt.hash(refreshToken, 10);
-    await user.save();
+    authUser.refresh_token = await bcrypt.hash(refreshToken, 10);
+    await authUser.save();
 
-    return { accessToken, refreshToken };
+    const user = await this.userService.findByAuthUserId(authUser.id);
+
+    if (!user) throw new UnauthorizedException('User not found');
+
+    return {
+      accessToken,
+      refreshToken,
+      user: { id: user.id, fullName: user.fullName, email: authUser.email, role: user.role },
+    };
   }
 
   async refreshTokens(userId: string, refreshToken: string) {

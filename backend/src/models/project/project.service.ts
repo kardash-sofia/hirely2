@@ -92,6 +92,7 @@ export class ProjectService {
         categories: project.projectCategories?.map(pc => pc.category.name) ?? [],
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       return plainToInstance(ProjectListItemDto, dto, {
         excludeExtraneousValues: true,
       }) as ProjectListItemDto;
