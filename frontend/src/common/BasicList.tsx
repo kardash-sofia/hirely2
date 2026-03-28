@@ -5,32 +5,32 @@ import { Loader } from './Loader';
 type GridWithPaginationProps<T> = {
   items: T[];
   itemsPerPage?: number;
+  total: number;
   renderItem: (item: T) => JSX.Element;
   loading?: boolean;
 };
 
-export const BasicList = <T,>({ items, itemsPerPage = 6, renderItem, loading }: GridWithPaginationProps<T>) => {
+export const BasicList = <T,>({ items, itemsPerPage = 10, total, renderItem, loading }: GridWithPaginationProps<T>) => {
   const [page, setPage] = useState(1);
 
-  const paginatedItems = items.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   return (
     <>
       <Loader loading={loading ?? false} />
       
       <Grid container spacing={2} justifyContent="center">
-        {paginatedItems.map((item) => (
-            <Grid item xs={12} sm={6} md="auto" key={item.id} sx={{ display: 'flex' }}>
-            <Box sx={{ maxWidth: 300, width: '100%' }}>
-                {renderItem(item)}
-            </Box>
+        {items.map((item, index) => (
+            <Grid item xs={12} sm={6} md={6} key={index} sx={{ display: 'flex' }} >
+              <Box sx={{ maxWidth: 300, width: '100%' }}>
+                  {renderItem(item)}
+              </Box>
             </Grid>
         ))}
       </Grid>
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
             <MuiPagination
-                count={Math.ceil(items.length / itemsPerPage)}
+                count={Math.ceil(total / itemsPerPage)}
                 page={page}
                 onChange={(_, value) => setPage(value)}
                 color="primary"

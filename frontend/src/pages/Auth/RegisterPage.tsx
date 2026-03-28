@@ -4,7 +4,7 @@ import { Box, Button, TextField, Typography, Paper, RadioGroup, FormControlLabel
 
 import { useSnackbar } from '../../common/Snackbar/useSnackbar';
 import { SnackbarType } from '../../common/Snackbar/types';
-import { useAuth } from '../../hooks/useAuth';
+import { Role, useAuth } from '../../hooks/useAuth';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -14,7 +14,7 @@ export default function RegisterPage() {
 
   const [form, setForm] = useState({
     fullName: '',
-    role: 'freelancer',
+    role: Role.FREELANCER,
     email: '',
     password: '',
   });
@@ -88,13 +88,22 @@ export default function RegisterPage() {
           margin="normal"
         />
 
-        <RadioGroup
-            defaultValue="freelancer"
-            name="role"
-            row
-        >
-            <FormControlLabel value="freelancer" control={<Radio />} label="Freelancer" />
-            <FormControlLabel value="customer" control={<Radio />} label="Employer" />
+       <RadioGroup
+          name="role"
+          row
+          value={form.role}
+          onChange={handleChange}
+>
+          <FormControlLabel
+            value={Role.FREELANCER}
+            control={<Radio />}
+            label="Freelancer"
+          />
+          <FormControlLabel
+            value={Role.CUSTOMER}
+            control={<Radio />}
+            label="Employer"
+          />
         </RadioGroup>
 
         <Button

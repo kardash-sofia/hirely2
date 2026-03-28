@@ -14,10 +14,13 @@ import {
   ProjectWithCategories,
 } from './dto/get-projects.dto';
 import { PredictProfitDto, PredictShipDto } from './dto/prediction.dto';
+import { ConstantsDto } from './dto/constants.dto';
+import { Category } from '../category/entities/category.entity';
+import { Technology } from '../technology/entities/technology.entity';
 
 const hardcodedOwner = {
   id: '098d10c2-b014-4a3d-b650-2fe4ee453785',
-  username: 'JohnDoe',
+  fullName: 'John Doe',
   email: 'john.doe@example.com',
 };
 
@@ -71,7 +74,7 @@ export class ProjectService {
     }
 
     if (categories?.length) {
-      qb.andWhere('pc.categoryId IN (:...categories)', { categories });
+      qb.andWhere('category.id IN (:...categories)', { categories });
     }
 
     qb.take(limit);
@@ -86,16 +89,20 @@ export class ProjectService {
         id: project.id,
         title: project.title,
         description: project.description,
-        owner: hardcodedOwner,
+        owner: {
+          id: project.owner?.id || hardcodedOwner.id,
+          fullName: project.owner?.fullName || hardcodedOwner.fullName,
+          email: project.owner?.authUser?.email || hardcodedOwner.email,
+        },
         budgetMin: project.budgetMin,
         budgetMax: project.budgetMax,
         categories: project.projectCategories?.map(pc => pc.category.name) ?? [],
+        status: project.status,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       return plainToInstance(ProjectListItemDto, dto, {
         excludeExtraneousValues: true,
-      }) as ProjectListItemDto;
+      });
     });
 
     return { items, total };
@@ -151,5 +158,22 @@ export class ProjectService {
 
       return project;
     });
+  }
+
+  async getProjectConstants(): Promise<ConstantsDto> {
+    const categories = await this.dataSource.getRepository(Category).find();
+
+    const technologies = await this.dataSource.getRepository(Technology).find();
+
+    return {
+      categories: categories.map(pc => ({
+        id: pc.id,
+        name: pc.name,
+      })),
+      technologies: technologies.map(pt => ({
+        id: pt.id,
+        name: pt.name,
+      })),
+    };
   }
 }

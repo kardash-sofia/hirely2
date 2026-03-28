@@ -14,5 +14,7 @@ export const endpoints = {
     byId: (id: string) => `/projects/${id}`,
     predictProfit: "/projects/predict_profit",
     predictShip: "/projects/predict_ship",
+    constants: "/projects/constants",
+    create: "/projects"
   },
 };

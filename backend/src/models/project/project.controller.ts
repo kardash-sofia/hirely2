@@ -29,4 +29,9 @@ export class ProjectController {
     const ownerId = '098d10c2-b014-4a3d-b650-2fe4ee453785';
     return this.projectService.createProject(dto, ownerId);
   }
+
+  @Get('constants')
+  async getConstants() {
+    return await this.projectService.getProjectConstants();
+  }
 }

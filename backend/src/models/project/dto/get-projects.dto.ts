@@ -38,7 +38,7 @@ export class ProjectListItemDto {
   @Expose()
   owner: {
     id: string;
-    username: string;
+    fullName: string;
     email: string;
   };
 
@@ -50,6 +50,9 @@ export class ProjectListItemDto {
 
   @Expose()
   categories: string[];
+
+  @Expose()
+  status: ProjectStatus;
 }
 
 export type ProjectWithCategories = {
@@ -58,10 +61,11 @@ export type ProjectWithCategories = {
   description?: string;
   owner: {
     id: string;
-    username: string;
+    fullName: string;
     email: string;
   };
   budgetMin?: number;
   budgetMax?: number;
   categories: string[];
+  status: ProjectStatus;
 };

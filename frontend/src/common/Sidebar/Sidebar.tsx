@@ -14,7 +14,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import {
   HomeOutlined,
   FolderOutlined,
-  EventOutlined,
   MessageOutlined,
   PersonOutline,
   LogoutOutlined,
@@ -80,7 +79,6 @@ export const Sidebar: React.FC = () => {
   const menuItems = [
     { label: 'Home', icon: <HomeOutlined />, path: '/' },
     { label: 'Projetos', icon: <FolderOutlined />, path: '/projects' },
-    { label: 'Eventos', icon: <EventOutlined />, path: '/events' },
     { label: 'Mensagens', icon: <MessageOutlined />, path: '/messages' },
     { label: 'Perfil', icon: <PersonOutline />, path: '/profile' },
   ];

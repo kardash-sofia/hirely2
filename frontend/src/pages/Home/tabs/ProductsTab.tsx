@@ -1,15 +1,16 @@
 import { ProductItem } from './ProductItem';
 import { BasicList } from '../../../common/BasicList';
 import DUMMY_IMAGE from '../../../assets/img.jpg';
-import { useProjects } from '../../../hooks/useProjects';
+import { useGetProjects } from '../../../hooks/useProjects';
 
 export const ProductsTab = () => {
-    const { data, isLoading } = useProjects();
+    const { data, isLoading } = useGetProjects();
     
     return (
         <BasicList
             items={data?.items || []}
-            renderItem={(item) => <ProductItem {...item} image={DUMMY_IMAGE} />}
+            total={data?.total || 0}
+            renderItem={(item) => <ProductItem {...item}  image={DUMMY_IMAGE} />}
             loading={isLoading}
         />
     );

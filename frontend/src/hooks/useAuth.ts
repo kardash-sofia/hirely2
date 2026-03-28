@@ -9,6 +9,11 @@ type User = {
   email: string;
 };
 
+export enum Role {
+  FREELANCER = 'freelancer', 
+  CUSTOMER = 'customer',
+}
+
 const useLogin = () => useMutation({ mutationFn: loginService });
 const useRegister = () => useMutation({ mutationFn: registerService });
 

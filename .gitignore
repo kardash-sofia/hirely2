@@ -23,3 +23,7 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
+
+# Other files
+database
+data-generator
