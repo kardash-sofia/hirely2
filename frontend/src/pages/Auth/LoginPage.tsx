@@ -1,9 +1,10 @@
 import { Box, Button, TextField, Typography, Paper, Link } from '@mui/material';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { useSnackbar } from '../../common/Snackbar/useSnackbar';
 import { SnackbarType } from '../../common/Snackbar/types';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from './useAuth';
 
 export default function LoginPage() {
   const { login } = useAuth();

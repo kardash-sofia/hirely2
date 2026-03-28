@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Grid, Box, Pagination as MuiPagination } from '@mui/material';
+import { Box, Grid, Pagination as MuiPagination } from '@mui/material';
 import { Loader } from './Loader';
 
 type GridWithPaginationProps<T> = {
@@ -20,11 +20,9 @@ export const BasicList = <T,>({ items, itemsPerPage = 10, total, renderItem, loa
       
       <Grid container spacing={2} justifyContent="center">
         {items.map((item, index) => (
-            <Grid item xs={12} sm={6} md={6} key={index} sx={{ display: 'flex' }} >
-              <Box sx={{ maxWidth: 300, width: '100%' }}>
-                  {renderItem(item)}
-              </Box>
-            </Grid>
+          <Box key={index} sx={{ flex: '1 1 300px', display: 'flex', maxWidth: 300 }}>
+            {renderItem(item)}
+          </Box>
         ))}
       </Grid>
 

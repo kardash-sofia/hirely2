@@ -1,10 +1,10 @@
-import { ProductItem } from './ProductItem';
+import { ProductItem } from '../components/ProductItem';
 import { BasicList } from '../../../common/BasicList';
 import DUMMY_IMAGE from '../../../assets/img.jpg';
-import { useGetProjects } from '../../../hooks/useProjects';
+import { useGetProjects } from '../../Projects/hooks/useGetProjects';
 
 export const ProductsTab = () => {
-    const { data, isLoading } = useGetProjects();
+    const { data, isLoading } = useGetProjects({ limit: 10, offset: 0 });
     
     return (
         <BasicList

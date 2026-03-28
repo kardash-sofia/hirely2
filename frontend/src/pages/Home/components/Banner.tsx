@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
-import BANNER_IMG from '../../assets/banner.jpg';
-import LOGO_IMG from '../../assets/logo.svg';
+import BANNER_IMG from '../../../assets/banner.jpg';
+import LOGO_IMG from '../../../assets/logo.svg';
 
 export const Banner = () => {
   return (

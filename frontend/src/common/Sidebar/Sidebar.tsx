@@ -19,7 +19,7 @@ import {
   LogoutOutlined,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../pages/Auth/useAuth';
 import { SidebarHeader } from './SidebarHeader';
 
 const drawerWidth = 200;

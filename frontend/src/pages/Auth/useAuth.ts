@@ -1,18 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from "@tanstack/react-query";
-import { login as loginService, register as registerService } from "../api/services/auth";
-
-type User = {
-  id: string;
-  fullName: string;
-  role: string;
-  email: string;
-};
-
-export enum Role {
-  FREELANCER = 'freelancer', 
-  CUSTOMER = 'customer',
-}
+import { login as loginService, register as registerService } from "../../api/services/Auth/auth";
+import type { User } from './types';
 
 const useLogin = () => useMutation({ mutationFn: loginService });
 const useRegister = () => useMutation({ mutationFn: registerService });

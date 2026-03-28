@@ -1,8 +1,8 @@
 import { Box, Container, Typography, Grid, Stack } from '@mui/material';
-import featureExplore from '../../assets/features/feature-explore.svg';
-import featureSearch from '../../assets/features/feature-search.svg';
-import featureDeal from '../../assets/features/feature-deal.svg';
-import featureMission from '../../assets/features/feature-mission.svg';
+import featureExplore from '../../../assets/features/feature-explore.svg';
+import featureSearch from '../../../assets/features/feature-search.svg';
+import featureDeal from '../../../assets/features/feature-deal.svg';
+import featureMission from '../../../assets/features/feature-mission.svg';
 
 type Feature = {
   icon: string;

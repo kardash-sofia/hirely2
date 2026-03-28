@@ -1,11 +1,13 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Button, Container, Typography } from "@mui/material"
+
 import { BasicList } from "../../common/BasicList"
-import { useGetProjects } from "../../hooks/useProjects";
+import { useGetProjects } from "./hooks/useGetProjects";
 import { ProjectItem } from "./components/ProjectItem";
 import DUMMY_IMAGE from '../../assets/img.jpg';
-import { Role, useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useAuth } from "../Auth/useAuth";
+import { Role } from "../Auth/types";
 
 export const ProjectsPage = () => {
   const { user } = useAuth();
@@ -13,15 +15,11 @@ export const ProjectsPage = () => {
 
   const itemsPerPage = 12;
   
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
-  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
-  const [page, setPage] = useState(0);
+  const [page] = useState(0);
 
   const { data, isLoading } = useGetProjects({
       limit: itemsPerPage,
       offset: page * itemsPerPage,
-      status: statusFilter,
-      categories: categoryFilter
     });
 
   const handleCreateProject = () => {

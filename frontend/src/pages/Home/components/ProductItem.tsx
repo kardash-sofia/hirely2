@@ -1,15 +1,15 @@
 import React from 'react';
 import { Card, CardContent, CardMedia, Divider, Typography } from '@mui/material';
 
-export type ProductItemType = {
+type Props = {
   id: string;
   image: string;
   title: string;
-  budgetMin: string;
-  budgetMax: string;
+  budgetMin?: number;
+  budgetMax?: number;
 };
 
-export const ProductItem: React.FC<ProductItemType> = ({ image, title, budgetMin, budgetMax }) => {
+export const ProductItem: React.FC<Props> = ({ image, title, budgetMin, budgetMax }) => {
   return (
     <Card
       sx={{

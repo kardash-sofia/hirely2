@@ -4,7 +4,8 @@ import { Box, Button, TextField, Typography, Paper, RadioGroup, FormControlLabel
 
 import { useSnackbar } from '../../common/Snackbar/useSnackbar';
 import { SnackbarType } from '../../common/Snackbar/types';
-import { Role, useAuth } from '../../hooks/useAuth';
+import { useAuth } from './useAuth';
+import { Role } from './types';
 
 export default function RegisterPage() {
   const { register } = useAuth();

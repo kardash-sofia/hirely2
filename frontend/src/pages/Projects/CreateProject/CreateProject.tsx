@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -18,21 +19,12 @@ import {
   Grid,
   Divider,
 } from "@mui/material";
-import { useCreateProject, useGetProjectConstants } from "../../hooks/useProjects";
-import { Loader } from "../../common/Loader";
-import { useSnackbar } from "../../common/Snackbar/useSnackbar";
-import { SnackbarType } from "../../common/Snackbar/types";
-import { useNavigate } from "react-router-dom";
-import type { CreateTaskType } from "../../api/services/projects";
-
-const priorities = [
-  { value: 0, label: "Lowest", color: "#BDBDBD" },
-  { value: 1, label: "Low", color: "#8FC1FF" },
-  { value: 2, label: "Medium", color: "#FFD966" },
-  { value: 3, label: "High", color: "#FFAB91" },
-  { value: 4, label: "Very High", color: "#FF6D6D" },
-  { value: 5, label: "Critical", color: "#D32F2F" },
-];
+import { Loader } from "../../../common/Loader";
+import { useSnackbar } from "../../../common/Snackbar/useSnackbar";
+import { SnackbarType } from "../../../common/Snackbar/types";
+import { useCreateProject, useGetProjectConstants } from "../hooks/useCreateProject";
+import type { CreateTaskType } from "../../../api/services/Projects/types";
+import { TaskPriorities } from "../types";
 
 export const CreateProject = () => {
   const { showSnackbar } = useSnackbar();
@@ -71,7 +63,6 @@ export const CreateProject = () => {
   };
 
   const handleCreateProject = () => {
-    console.log("Creating project with data:", form, "and tasks:", tasks);
     const payload = {
       ...form,
       budgetMin: Number(form.budget),
@@ -85,7 +76,7 @@ export const CreateProject = () => {
         showSnackbar("Project created successfully!", SnackbarType.SUCCESS);
         navigate('/projects');
       },
-      onError: (error) => {
+      onError: (error: Error) => {
         showSnackbar(`Failed to create project. Please try again. ${error.message} `, SnackbarType.ERROR);
       }
     });
@@ -132,6 +123,7 @@ export const CreateProject = () => {
                 <InputLabel>Categories</InputLabel>
                 <Select
                   multiple
+                  fullWidth
                   value={form.categories}
                   onChange={e => handleChange("categories", e.target.value)}
                   input={<OutlinedInput label="Categories" />}
@@ -160,6 +152,7 @@ export const CreateProject = () => {
                 <InputLabel>Technologies</InputLabel>
                 <Select
                   multiple
+                  fullWidth
                   value={form.technologies}
                   onChange={e => handleChange("technologies", e.target.value)}
                   input={<OutlinedInput label="Technologies" />}
@@ -268,7 +261,7 @@ export const CreateProject = () => {
                           width: 10,
                           height: 10,
                           borderRadius: "50%",
-                          bgcolor: priorities.find(p => p.value === task.priority)?.color,
+                          bgcolor: TaskPriorities.find(p => p.value === task.priority)?.color,
                         }}
                       />
                     </Box>
@@ -321,7 +314,7 @@ export const CreateProject = () => {
                 value={taskForm.priority}
                 onChange={e => setTaskForm(p => ({ ...p, priority: e.target.value }))}
               >
-                {priorities.map(p => (
+                {TaskPriorities.map(p => (
                   <MenuItem key={p.value} value={p.value}>
                     {p.label}
                   </MenuItem>
