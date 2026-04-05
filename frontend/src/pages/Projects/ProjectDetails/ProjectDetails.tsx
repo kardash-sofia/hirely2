@@ -1,10 +1,10 @@
 import { Box, Container, Typography, Chip, Stack, Avatar, Divider, Paper } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import PersonIcon from '@mui/icons-material/Person';
 import { useParams } from 'react-router-dom';
 import { useGetProjectDetails } from '../hooks/useGetProjectDetails';
 import { Loader } from '../../../common/Loader';
+import { OwnerInfo } from '../components/OwnerInfo';
 
 const DUMMY_IMAGE = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2070';
 
@@ -127,15 +127,8 @@ export const ProjectDetailsPage = () => {
 
               {/* OWNER */}
               <Paper sx={{ p: 2, borderRadius: 3 }}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <PersonIcon />
-                  <Typography fontWeight={600}>Owner</Typography>
-                </Stack>
-
-                <Stack direction="row" spacing={2} alignItems="center" mt={1}>
-                  <Avatar src={data?.owner?.fullName} />
-                  <Typography>{data?.owner?.email || 'Unknown'}</Typography>
-                </Stack>
+                <Typography fontWeight={600}>Owner</Typography>
+                {data?.owner ? <OwnerInfo owner={data.owner} /> : <Typography>No owner information</Typography>}
               </Paper>
 
               {/* EXECUTOR */}

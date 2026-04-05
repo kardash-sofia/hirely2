@@ -25,5 +25,5 @@ lerna-debug.log*
 .tmp
 
 # Other files
-database
+databaseTest
 data-generator

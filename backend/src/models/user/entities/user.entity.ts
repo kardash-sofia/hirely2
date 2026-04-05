@@ -1,7 +1,8 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/base/base.entity';
 import { Roles } from '../constants';
 import { AuthUser } from '../../auth/entities/auth.entity';
+import { Project } from '../../project/entities/project.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -20,4 +21,10 @@ export class User extends BaseEntity {
   @OneToOne(() => AuthUser, authUser => authUser.user)
   @JoinColumn({ name: 'authUserId' })
   authUser: AuthUser;
+
+  @OneToMany(() => Project, project => project.owner)
+  ownedProjects: Project[];
+
+  @OneToMany(() => Project, project => project.executor)
+  executedProjects: Project[];
 }

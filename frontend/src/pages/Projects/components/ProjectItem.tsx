@@ -7,8 +7,8 @@ import {
   Divider,
   Typography,
   Box,
-  Avatar,
 } from '@mui/material';
+import { OwnerInfo } from './OwnerInfo';
 
 export type ProjectItemType = {
   id: string;
@@ -19,6 +19,7 @@ export type ProjectItemType = {
   budgetMax?: number;
   status: string;
   owner: {
+    id: string;
     fullName: string;
     email: string;
     avatar?: string;
@@ -56,23 +57,7 @@ export const ProjectItem: React.FC<ProjectItemType> = ({
 
       <CardContent>
         {/* Owner */}
-        <Box display="flex" alignItems="center" mb={1.5}>
-          <Avatar
-            src={owner.avatar}
-            sx={{ width: 36, height: 36, mr: 1.5 }}
-          >
-            {owner.fullName?.[0]}
-          </Avatar>
-
-          <Box>
-            <Typography variant="body2" fontWeight={600}>
-              {owner.fullName}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {owner.email}
-            </Typography>
-          </Box>
-        </Box>
+        <OwnerInfo owner={owner} />
 
         {/* Title */}
         <Typography

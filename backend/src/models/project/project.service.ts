@@ -13,18 +13,11 @@ import { ConstantsDto } from './dto/constants.dto';
 import { Category } from '../category/entities/category.entity';
 import { Technology } from '../technology/entities/technology.entity';
 
-const hardcodedOwner = {
-  id: '098d10c2-b014-4a3d-b650-2fe4ee453785',
-  fullName: 'John Doe',
-  email: 'john.doe@example.com',
-};
-
 @Injectable()
 export class ProjectService {
   constructor(private readonly dataSource: DataSource) {}
 
   async getProjects(query: GetProjectsQueryDto) {
-    console.log('Query received in service:', query);
     const {
       limit = 10,
       offset = 0,
@@ -37,7 +30,8 @@ export class ProjectService {
     const qb = this.dataSource
       .getRepository(Project)
       .createQueryBuilder('project')
-      //.leftJoinAndSelect('project.owner', 'owner')
+      .leftJoinAndSelect('project.owner', 'owner')
+      .leftJoinAndSelect('owner.authUser', 'ownerAuthUser')
       .leftJoinAndSelect('project.projectCategories', 'pc')
       .leftJoinAndSelect('pc.category', 'category')
       .leftJoinAndSelect('project.projectTechnologies', 'pt')
@@ -58,21 +52,21 @@ export class ProjectService {
     qb.take(limit);
     qb.skip(offset);
 
-    sorts.forEach(sort => {
+    sorts?.forEach(sort => {
       qb.addOrderBy(`project.${sort.field}`, sort.order);
     });
 
     const [projects, total] = await qb.getManyAndCount();
 
-    const items: ProjectListItemDto[] = projects.map(project => {
+    const items: ProjectListItemDto[] = projects?.map(project => {
       const dto: ProjectDto = {
         id: project.id,
         title: project.title,
         description: project.description,
         owner: {
-          id: project.owner?.id || hardcodedOwner.id,
-          fullName: project.owner?.fullName || hardcodedOwner.fullName,
-          email: project.owner?.authUser?.email || hardcodedOwner.email,
+          id: project.owner?.id,
+          fullName: project.owner?.fullName,
+          email: project.owner?.authUser?.email,
         },
         budgetMin: project.budgetMin,
         budgetMax: project.budgetMax,
@@ -94,19 +88,16 @@ export class ProjectService {
     const project = await this.dataSource.getRepository(Project).findOne({
       where: { id },
       relations: [
+        'owner',
+        'owner.authUser',
+        'executor',
+        'executor.authUser',
+        'tasks',
         'projectCategories',
         'projectCategories.category',
         'projectTechnologies',
         'projectTechnologies.technology',
       ],
-      //   'owner',
-      //   'executor',
-      //   'tasks',
-      //   'projectCategories',
-      //   'projectCategories.category',
-      //   'projectTechnologies',
-      //   'projectTechnologies.technology',
-      // ],
     });
 
     if (!project) {
@@ -123,6 +114,11 @@ export class ProjectService {
         id: pt.technology.id,
         name: pt.technology.name,
       })),
+      owner: {
+        id: project.owner?.id,
+        fullName: project.owner?.fullName,
+        email: project.owner?.authUser?.email,
+      },
     };
   }
 
@@ -184,11 +180,11 @@ export class ProjectService {
     const technologies = await this.dataSource.getRepository(Technology).find();
 
     return {
-      categories: categories.map(pc => ({
+      categories: categories?.map(pc => ({
         id: pc.id,
         name: pc.name,
       })),
-      technologies: technologies.map(pt => ({
+      technologies: technologies?.map(pt => ({
         id: pt.id,
         name: pt.name,
       })),

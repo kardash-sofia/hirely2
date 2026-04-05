@@ -7,7 +7,7 @@ import { GetProjectsQueryDto } from './dto/get-projects.dto';
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
-  @Get(':id')
+  @Get('byId/:id')
   async getProject(@Param('id') id: string) {
     return this.projectService.getProjectById(id);
   }

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/base.entity';
 import { ProjectCategory } from '../../project-category/entities/project-category.entity';
 import { ProjectTechnology } from '../../project-technology/entities/project-technology.entity';
@@ -32,10 +32,12 @@ export class Project extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   executorId: string;
 
-  @OneToOne(() => User, user => user.id)
+  @ManyToOne(() => User, user => user.ownedProjects)
+  @JoinColumn({ name: 'ownerId' })
   owner: User;
 
-  @OneToOne(() => User, user => user.id, { nullable: true })
+  @ManyToOne(() => User, user => user.executedProjects, { nullable: true })
+  @JoinColumn({ name: 'executorId' })
   executor: User;
 
   @OneToMany(() => Task, task => task.project)
