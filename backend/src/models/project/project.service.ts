@@ -8,12 +8,7 @@ import { ProjectCategory } from '../project-category/entities/project-category.e
 import { ProjectTechnology } from '../project-technology/entities/project-technology.entity';
 import { ProjectStatus } from './constants';
 import { TaskStatus } from '../task/constants';
-import {
-  GetProjectsQueryDto,
-  ProjectListItemDto,
-  ProjectWithCategories,
-} from './dto/get-projects.dto';
-import { PredictProfitDto, PredictShipDto } from './dto/prediction.dto';
+import { GetProjectsQueryDto, ProjectDto, ProjectListItemDto } from './dto/get-projects.dto';
 import { ConstantsDto } from './dto/constants.dto';
 import { Category } from '../category/entities/category.entity';
 import { Technology } from '../technology/entities/technology.entity';
@@ -28,46 +23,25 @@ const hardcodedOwner = {
 export class ProjectService {
   constructor(private readonly dataSource: DataSource) {}
 
-  async predictProfit(dto: PredictProfitDto) {
-    const response = await fetch(`${process.env.PREDICTION_URL}/predict_profit`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(dto),
-    });
-
-    const data = await response.json();
-
-    console.log('Received response from prediction service:', data);
-
-    return data;
-  }
-
-  async predictShip(dto: PredictShipDto) {
-    const response = await fetch(`${process.env.PREDICTION_URL}/predict_ship`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(dto),
-    });
-
-    const data = await response.json();
-
-    console.log('Received response from prediction service:', data);
-
-    return data;
-  }
-
   async getProjects(query: GetProjectsQueryDto) {
-    const { limit = 10, offset = 0, status, categories } = query;
+    console.log('Query received in service:', query);
+    const {
+      limit = 10,
+      offset = 0,
+      status,
+      categories,
+      technologies,
+      sorts = [{ field: 'createdAt', order: 'DESC' }],
+    } = query;
 
     const qb = this.dataSource
       .getRepository(Project)
       .createQueryBuilder('project')
+      //.leftJoinAndSelect('project.owner', 'owner')
       .leftJoinAndSelect('project.projectCategories', 'pc')
-      .leftJoinAndSelect('pc.category', 'category');
+      .leftJoinAndSelect('pc.category', 'category')
+      .leftJoinAndSelect('project.projectTechnologies', 'pt')
+      .leftJoinAndSelect('pt.technology', 'technology');
 
     if (status) {
       qb.andWhere('project.status = :status', { status });
@@ -77,15 +51,21 @@ export class ProjectService {
       qb.andWhere('category.id IN (:...categories)', { categories });
     }
 
+    if (technologies?.length) {
+      qb.andWhere('technology.id IN (:...technologies)', { technologies });
+    }
+
     qb.take(limit);
     qb.skip(offset);
 
-    qb.orderBy('project.createdAt', 'DESC');
+    sorts.forEach(sort => {
+      qb.addOrderBy(`project.${sort.field}`, sort.order);
+    });
 
     const [projects, total] = await qb.getManyAndCount();
 
     const items: ProjectListItemDto[] = projects.map(project => {
-      const dto: ProjectWithCategories = {
+      const dto: ProjectDto = {
         id: project.id,
         title: project.title,
         description: project.description,
@@ -96,8 +76,9 @@ export class ProjectService {
         },
         budgetMin: project.budgetMin,
         budgetMax: project.budgetMax,
-        categories: project.projectCategories?.map(pc => pc.category.name) ?? [],
         status: project.status,
+        categories: project.projectCategories?.map(pc => pc.category.name) ?? [],
+        technologies: project.projectTechnologies?.map(pt => pt.technology.name) ?? [],
       };
 
       return plainToInstance(ProjectListItemDto, dto, {
@@ -106,6 +87,43 @@ export class ProjectService {
     });
 
     return { items, total };
+  }
+
+  async getProjectById(id: string) {
+    console.log('Getting project by ID:', id);
+    const project = await this.dataSource.getRepository(Project).findOne({
+      where: { id },
+      relations: [
+        'projectCategories',
+        'projectCategories.category',
+        'projectTechnologies',
+        'projectTechnologies.technology',
+      ],
+      //   'owner',
+      //   'executor',
+      //   'tasks',
+      //   'projectCategories',
+      //   'projectCategories.category',
+      //   'projectTechnologies',
+      //   'projectTechnologies.technology',
+      // ],
+    });
+
+    if (!project) {
+      return null;
+    }
+
+    return {
+      ...project,
+      projectCategories: project.projectCategories?.map(pc => ({
+        id: pc.category.id,
+        name: pc.category.name,
+      })),
+      projectTechnologies: project.projectTechnologies?.map(pt => ({
+        id: pt.technology.id,
+        name: pt.technology.name,
+      })),
+    };
   }
 
   async createProject(dto: CreateProjectDto, ownerId: string) {

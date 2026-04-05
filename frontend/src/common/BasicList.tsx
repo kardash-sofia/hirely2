@@ -1,4 +1,4 @@
-import { useState, type JSX } from 'react';
+import { type JSX } from 'react';
 import { Box, Grid, Pagination as MuiPagination } from '@mui/material';
 import { Loader } from './Loader';
 
@@ -8,11 +8,11 @@ type GridWithPaginationProps<T> = {
   total: number;
   renderItem: (item: T) => JSX.Element;
   loading?: boolean;
+  page: number;
+  onPageChange: (page: number) => void;
 };
 
-export const BasicList = <T,>({ items, itemsPerPage = 10, total, renderItem, loading }: GridWithPaginationProps<T>) => {
-  const [page, setPage] = useState(1);
-
+export const BasicList = <T,>({ items, itemsPerPage = 10, total, renderItem, loading, page, onPageChange }: GridWithPaginationProps<T>) => {
 
   return (
     <>
@@ -27,15 +27,15 @@ export const BasicList = <T,>({ items, itemsPerPage = 10, total, renderItem, loa
       </Grid>
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-            <MuiPagination
-                count={Math.ceil(total / itemsPerPage)}
-                page={page}
-                onChange={(_, value) => setPage(value)}
-                color="primary"
-                shape="rounded"
-                variant="outlined"
-            />
-        </Box>
+        <MuiPagination
+            count={Math.ceil(total / itemsPerPage)}
+            page={page}
+            onChange={(_, value) => onPageChange(value)}
+            color="primary"
+            shape="rounded"
+            variant="outlined"
+        />
+      </Box>
     </>
   );
 };

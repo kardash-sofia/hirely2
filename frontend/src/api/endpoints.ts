@@ -6,6 +6,7 @@ export const endpoints = {
 
   projects: {
     list: "/projects",
+    byId: (id: string) => `/projects/${id}`,
     constants: "/projects/constants",
     create: "/projects"
   },

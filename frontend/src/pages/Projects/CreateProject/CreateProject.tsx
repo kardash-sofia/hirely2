@@ -22,15 +22,16 @@ import {
 import { Loader } from "../../../common/Loader";
 import { useSnackbar } from "../../../common/Snackbar/useSnackbar";
 import { SnackbarType } from "../../../common/Snackbar/types";
-import { useCreateProject, useGetProjectConstants } from "../hooks/useCreateProject";
+import { useCreateProject } from "../hooks/useCreateProject";
 import type { CreateTaskType } from "../../../api/services/Projects/types";
 import { TaskPriorities } from "../types";
+import { useGetConstants } from "../hooks/useGetConstants";
 
 export const CreateProject = () => {
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
-  const { data: constants, isLoading: constantsLoading } = useGetProjectConstants();
+  const { data: constants, isLoading: constantsLoading } = useGetConstants();
   const { mutate: createProject } = useCreateProject();
 
   const [form, setForm] = useState({
@@ -52,7 +53,7 @@ export const CreateProject = () => {
     dueDate: "",
   });
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: unknown) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 

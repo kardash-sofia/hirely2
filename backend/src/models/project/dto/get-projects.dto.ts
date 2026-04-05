@@ -23,7 +23,19 @@ export class GetProjectsQueryDto {
   @IsOptional()
   @IsUUID('4', { each: true })
   categories?: string[];
+
+  @IsOptional()
+  @IsUUID('4', { each: true })
+  technologies?: string[];
+
+  @IsOptional()
+  sorts?: SortOption[];
 }
+
+export type SortOption = {
+  field: string;
+  order: 'ASC' | 'DESC';
+};
 
 export class ProjectListItemDto {
   @Expose()
@@ -55,7 +67,7 @@ export class ProjectListItemDto {
   status: ProjectStatus;
 }
 
-export type ProjectWithCategories = {
+export type ProjectDto = {
   id: string;
   title: string;
   description?: string;
@@ -67,5 +79,6 @@ export type ProjectWithCategories = {
   budgetMin?: number;
   budgetMax?: number;
   categories: string[];
+  technologies: string[];
   status: ProjectStatus;
 };

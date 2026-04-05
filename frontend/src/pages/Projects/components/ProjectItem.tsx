@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -25,6 +26,7 @@ export type ProjectItemType = {
 };
 
 export const ProjectItem: React.FC<ProjectItemType> = ({
+  id,
   image,
   title,
   description,
@@ -35,14 +37,16 @@ export const ProjectItem: React.FC<ProjectItemType> = ({
 }) => {
   return (
     <Card
+      component={Link}
+      to={`/projects/${id}`}
       sx={{
         borderRadius: 4,
         boxShadow: 3,
         transition: 'all 0.2s ease',
+        textDecoration: 'none',
         '&:hover': {
-          transform: 'translateY(-6px)',
-          boxShadow: 6,
-        },
+          cursor: 'pointer',
+        }
       }}
     >
       {/* Image */}
@@ -71,7 +75,11 @@ export const ProjectItem: React.FC<ProjectItemType> = ({
         </Box>
 
         {/* Title */}
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography
+          variant="subtitle1"
+          gutterBottom
+          fontWeight={600}
+        >
           {title}
         </Typography>
 

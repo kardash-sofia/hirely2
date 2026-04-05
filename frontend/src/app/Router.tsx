@@ -7,6 +7,7 @@ import { HomePage } from '../pages/Home/HomePage';
 import { CreateProject, EditProject, ProjectsPage } from '../pages/Projects';
 import LoginPage from '../pages/Auth/LoginPage';
 import RegisterPage from '../pages/Auth/RegisterPage';
+import { ProjectDetailsPage } from '../pages/Projects/ProjectDetails/ProjectDetails';
 
 export const AppRouter = () => {
   return (
@@ -18,6 +19,7 @@ export const AppRouter = () => {
             <Route path="/" element={<HomePage />} />
 
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/projects/:id" element={<ProjectDetailsPage />} />
             <Route path="/projects/create" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
             <Route path="/projects/:id/edit" element={<ProtectedRoute><EditProject /></ProtectedRoute>} />
 

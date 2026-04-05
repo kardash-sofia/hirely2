@@ -36,3 +36,17 @@ export type ProjectItemType = {
   categories: string[];
   status: ProjectStatus;
 }
+
+export type ProjectDetails = ProjectItemType & {
+  technologies: string[];
+  executor?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  projectTechnologies?: NamedEntity[];
+  projectCategories?: NamedEntity[];
+  dueDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -16,6 +16,11 @@ export const getProjects = async (query: GetProjectsQuery) => {
   return data;
 };
 
+export const getProjectById = async (id: string) => {
+  const { data } = await api.get(endpoints.projects.byId(id));
+  return data;
+}
+
 export const getProjectConstants = async () => {
   const { data } = await api.get(endpoints.projects.constants);
   return data;
