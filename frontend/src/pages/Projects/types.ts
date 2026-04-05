@@ -50,3 +50,11 @@ export type ProjectDetails = ProjectItemType & {
   createdAt: string;
   updatedAt: string;
 }
+
+export type FiltersState = {
+  status: ProjectStatus | "";
+  categories: string[];
+  technologies: string[];
+  sortField: string;
+  sortOrder: "ASC" | "DESC";
+};

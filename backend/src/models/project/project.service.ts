@@ -24,7 +24,8 @@ export class ProjectService {
       status,
       categories,
       technologies,
-      sorts = [{ field: 'createdAt', order: 'DESC' }],
+      sortField,
+      sortOrder,
     } = query;
 
     const qb = this.dataSource
@@ -37,24 +38,30 @@ export class ProjectService {
       .leftJoinAndSelect('project.projectTechnologies', 'pt')
       .leftJoinAndSelect('pt.technology', 'technology');
 
+    const normalizeArray = (value?: string[] | string) => {
+      if (!value) return undefined;
+      return Array.isArray(value) ? value : [value];
+    };
+
+    const categoriesArray = normalizeArray(categories);
+    const technologiesArray = normalizeArray(technologies);
+
     if (status) {
       qb.andWhere('project.status = :status', { status });
     }
 
-    if (categories?.length) {
-      qb.andWhere('category.id IN (:...categories)', { categories });
+    if (categoriesArray?.length) {
+      qb.andWhere('category.id IN (:...categories)', { categories: categoriesArray });
     }
 
-    if (technologies?.length) {
-      qb.andWhere('technology.id IN (:...technologies)', { technologies });
+    if (technologiesArray?.length) {
+      qb.andWhere('technology.id IN (:...technologies)', { technologies: technologiesArray });
     }
 
     qb.take(limit);
     qb.skip(offset);
 
-    sorts?.forEach(sort => {
-      qb.addOrderBy(`project.${sort.field}`, sort.order);
-    });
+    qb.addOrderBy(`project.${sortField}`, sortOrder);
 
     const [projects, total] = await qb.getManyAndCount();
 

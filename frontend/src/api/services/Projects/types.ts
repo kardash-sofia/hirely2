@@ -3,6 +3,9 @@ export type GetProjectsQuery = {
   offset?: number;
   status?: string;
   categories?: string[];
+  technologies?: string[];
+  sortField?: string;
+  sortOrder?: "ASC" | "DESC";
 }
 
 export type CreateTaskType = {

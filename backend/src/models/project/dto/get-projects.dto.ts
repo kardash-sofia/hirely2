@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsOptional, IsUUID, Min } from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsOptional, IsUUID, Min } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
 
 import { ProjectStatus } from '../constants';
@@ -22,14 +22,18 @@ export class GetProjectsQueryDto {
 
   @IsOptional()
   @IsUUID('4', { each: true })
-  categories?: string[];
+  categories?: string[] | string;
 
   @IsOptional()
   @IsUUID('4', { each: true })
-  technologies?: string[];
+  technologies?: string[] | string;
 
   @IsOptional()
-  sorts?: SortOption[];
+  sortField?: string;
+
+  @IsOptional()
+  @IsIn(['ASC', 'DESC'])
+  sortOrder?: 'ASC' | 'DESC';
 }
 
 export type SortOption = {

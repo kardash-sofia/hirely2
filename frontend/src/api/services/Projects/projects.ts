@@ -11,6 +11,13 @@ export const getProjects = async (query: GetProjectsQuery) => {
   if (query.categories?.length) {
     query.categories.forEach(cat => params.append("categories", cat));
   }
+  if (query.technologies?.length) {
+    query.technologies.forEach(tech => params.append("technologies", tech));
+  }
+  if (query.sortField && query.sortOrder) {
+    params.append("sortField", query.sortField);
+    params.append("sortOrder", query.sortOrder);
+  }
 
   const { data } = await api.get(endpoints.projects.list, { params });
   return data;
