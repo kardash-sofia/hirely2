@@ -1,4 +1,5 @@
 import { Box, Container, Typography, Chip, Stack, Avatar, Divider, Paper } from '@mui/material';
+import { Link as RouterLink } from "react-router-dom";
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { useParams } from 'react-router-dom';
@@ -11,8 +12,6 @@ const DUMMY_IMAGE = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55
 export const ProjectDetailsPage = () => {
 
   const { id } = useParams<{ id: string }>();
-
-  console.log("ID перед хуком:", id, typeof id);
 
   const { data, isLoading } = useGetProjectDetails(id ?? '');
 
@@ -126,10 +125,23 @@ export const ProjectDetailsPage = () => {
               </Paper>
 
               {/* OWNER */}
-              <Paper sx={{ p: 2, borderRadius: 3 }}>
-                <Typography fontWeight={600}>Owner</Typography>
-                {data?.owner ? <OwnerInfo owner={data.owner} /> : <Typography>No owner information</Typography>}
-              </Paper>
+              {data?.owner ? (
+              <Box
+                component={RouterLink}
+                to={`/profile/${data.owner.id}`}
+                sx={{
+                  textDecoration: "none",
+                  color: "inherit",
+                  cursor: "pointer",
+                }}
+              >
+                <Paper sx={{ p: 2, borderRadius: 3, "&:hover": { boxShadow: 4 } }}>
+                  <OwnerInfo owner={data.owner} />
+                </Paper>
+              </Box>
+            ) : (
+              <Typography>No owner information</Typography>
+            )}
 
               {/* EXECUTOR */}
               {data?.executor && (

@@ -80,7 +80,7 @@ export const Sidebar: React.FC = () => {
     { label: 'Home', icon: <HomeOutlined />, path: '/' },
     { label: 'Projetos', icon: <FolderOutlined />, path: '/projects' },
     { label: 'Mensagens', icon: <MessageOutlined />, path: '/messages' },
-    { label: 'Perfil', icon: <PersonOutline />, path: '/profile' },
+    { label: 'Perfil', icon: <PersonOutline />, path: '/profile/me' },
   ];
 
   return (

@@ -13,7 +13,7 @@ export const palette = {
   },
   custom: {
     lavander: '#D3C5F8',
-    spaceGradient: 'linear-gradient(135deg, #1A0B40 0%, #6C63FF 100%)',
+    spaceGradient: 'linear-gradient(135deg, #46307B 0%, #6C63FF 100%)',
   },
   text: {
     primary: '#1A0B40',

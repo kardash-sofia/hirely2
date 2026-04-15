@@ -5,15 +5,17 @@ import { AuthUser } from './entities/auth.entity';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Roles } from '../user/constants';
+import { FreelancerProfileService } from '../freelancer-profile/freelancerProfile.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
+    private profileService: FreelancerProfileService,
   ) {}
 
-  async register(email: string, password: string, fullName: string, role: string) {
+  async register(email: string, password: string, fullName: string, role: Roles) {
     const existingUser = await AuthUser.findOne({ where: { email } });
     if (existingUser) {
       throw new UnauthorizedException('User already exists');
@@ -29,10 +31,16 @@ export class AuthService {
     const user = await this.userService.create({
       authUserId: authUser.id,
       fullName: fullName,
-      role: role as Roles,
+      role: role,
     } as CreateUserDto);
 
     await user.save();
+
+    if (role === Roles.FREELANCER) {
+      await this.profileService.create({
+        userId: user.id,
+      });
+    }
 
     return { success: true, message: 'User registered successfully' };
   }

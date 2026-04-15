@@ -10,4 +10,9 @@ export const endpoints = {
     constants: "/projects/constants",
     create: "/projects"
   },
+
+  profile: {
+    userById: (id: string) => `/users/${id}`,
+    getMe: () => `/users/profile/me`,
+  },
 };

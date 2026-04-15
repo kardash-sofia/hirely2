@@ -9,6 +9,7 @@ import LoginPage from '../pages/Auth/LoginPage';
 import RegisterPage from '../pages/Auth/RegisterPage';
 import { ProjectDetailsPage } from '../pages/Projects/ProjectDetails/ProjectDetails';
 import { ChatPage } from '../pages/Messages/ChatPage';
+import { ProfilePage } from '../pages/Profile/ProfilePage';
 
 export const AppRouter = () => {
   return (
@@ -21,6 +22,9 @@ export const AppRouter = () => {
 
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/projects/:id" element={<ProjectDetailsPage />} />
+          
+            <Route path="/profile/:id" element={<ProfilePage />} />
+
             <Route path="/projects/create" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
             <Route path="/projects/:id/edit" element={<ProtectedRoute><EditProject /></ProtectedRoute>} />
 

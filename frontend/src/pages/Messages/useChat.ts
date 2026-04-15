@@ -13,6 +13,7 @@ export const useChat = (chatId?: string) => {
   useEffect(() => {
     if (!socket || !chatId) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMessages([]);
 
     socket.emit("joinChat", chatId);
