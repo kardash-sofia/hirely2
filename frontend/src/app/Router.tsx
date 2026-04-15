@@ -8,6 +8,7 @@ import { CreateProject, EditProject, ProjectsPage } from '../pages/Projects';
 import LoginPage from '../pages/Auth/LoginPage';
 import RegisterPage from '../pages/Auth/RegisterPage';
 import { ProjectDetailsPage } from '../pages/Projects/ProjectDetails/ProjectDetails';
+import { ChatPage } from '../pages/Messages/ChatPage';
 
 export const AppRouter = () => {
   return (
@@ -22,6 +23,8 @@ export const AppRouter = () => {
             <Route path="/projects/:id" element={<ProjectDetailsPage />} />
             <Route path="/projects/create" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
             <Route path="/projects/:id/edit" element={<ProtectedRoute><EditProject /></ProtectedRoute>} />
+
+            <Route path="/messages/*" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
