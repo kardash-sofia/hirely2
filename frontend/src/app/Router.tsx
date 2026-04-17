@@ -22,6 +22,9 @@ export const AppRouter = () => {
 
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/projects/:id" element={<ProjectDetailsPage />} />
+
+            <Route path="/chats/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+            <Route path="/chats/:chatId/:targetUserId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           
             <Route path="/profile/:id" element={<ProfilePage />} />
 

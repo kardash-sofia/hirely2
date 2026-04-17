@@ -1,14 +1,25 @@
-import { Box, Avatar, Typography, Chip, Stack, IconButton } from "@mui/material";
+import {
+  Box,
+  Avatar,
+  Typography,
+  Chip,
+  Stack,
+  IconButton,
+  Button,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { palette } from "../../../theme/palette";
 import type { User } from "../../../api/services/Profile/types";
 
 type Props = {
   user: User;
   isEditing: boolean;
+  isMe: boolean;
+  onMessage?: () => void;
 };
 
-export const ProfileHeader = ({ user, isEditing }: Props) => {
+export const ProfileHeader = ({ user, isEditing, isMe, onMessage }: Props) => {
   return (
     <Box
       sx={{
@@ -39,7 +50,7 @@ export const ProfileHeader = ({ user, isEditing }: Props) => {
         </IconButton>
       )}
 
-      <Avatar sx={{ width: 80, height: 80 }} />
+      <Avatar src={user?.avatar_url ?? undefined} sx={{ width: 80, height: 80 }} />
 
       <Box sx={{ flex: 1 }}>
         <Typography variant="h5" fontWeight={700}>
@@ -50,7 +61,7 @@ export const ProfileHeader = ({ user, isEditing }: Props) => {
           {user?.email || ""}
         </Typography>
 
-        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
           {user?.profile?.skills?.map((skill) => (
             <Chip
               key={skill}
@@ -61,10 +72,28 @@ export const ProfileHeader = ({ user, isEditing }: Props) => {
         </Stack>
       </Box>
 
-      <Box sx={{ textAlign: "right" }}>
-        <Typography sx={{ opacity: 0.8 }}>
-          {user?.role || ""}
-        </Typography>
+      <Box sx={{ textAlign: "right", display: "flex", flexDirection: "column", gap: 1 }}>
+        <Typography sx={{ opacity: 0.8 }}>{user?.role || ""}</Typography>
+
+        {!isMe && (
+          <Button
+            variant="contained"
+            startIcon={<ChatBubbleOutlineIcon />}
+            onClick={onMessage}
+            sx={{
+              backgroundColor: "#fff",
+              color: "#111",
+              borderRadius: 999,
+              textTransform: "none",
+              fontWeight: 600,
+              "&:hover": {
+                backgroundColor: "#f2f2f2",
+              },
+            }}
+          >
+            Write message
+          </Button>
+        )}
       </Box>
     </Box>
   );

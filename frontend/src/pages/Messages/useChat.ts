@@ -1,22 +1,35 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSocket } from "../../app/context/SocketContext";
 import type { Chat, Message } from "./types";
-import { useAuth } from "../Auth/useAuth";
+
+type ErrorResponse = { error: string };
+
+const isErrorResponse = (value: unknown): value is ErrorResponse => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "error" in value &&
+    typeof (value as ErrorResponse).error === "string"
+  );
+};
 
 export const useChat = (chatId?: string) => {
   const socket = useSocket();
-  const { user } = useAuth();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [chats, setChats] = useState<Chat[]>([]);
 
   useEffect(() => {
-    if (!socket || !chatId) return;
+    if (!socket || !chatId || chatId === "newChat") return;
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMessages([]);
 
-    socket.emit("joinChat", chatId);
+    socket.emit("joinChat", chatId, (response?: { success?: boolean; error?: string }) => {
+      if (response?.error) {
+        console.error("joinChat error:", response.error);
+      }
+    });
 
     const handleChatMessages = (msgs: Message[]) => {
       setMessages(msgs);
@@ -28,6 +41,18 @@ export const useChat = (chatId?: string) => {
       setMessages((prev) => {
         if (prev.some((m) => m.id === msg.id)) return prev;
         return [...prev, msg];
+      });
+
+      setChats((prev) => {
+        const existing = prev.find((c) => c.id === msg.chatId);
+        if (!existing) return prev;
+
+        const updatedChat = {
+          ...existing,
+          lastMessage: msg,
+        };
+
+        return [updatedChat, ...prev.filter((c) => c.id !== msg.chatId)];
       });
     };
 
@@ -41,63 +66,118 @@ export const useChat = (chatId?: string) => {
     };
   }, [socket, chatId]);
 
-  useEffect(() => {
-    if (!socket) return;
+  const getChats = useCallback((): Promise<Chat[]> => {
+    return new Promise((resolve, reject) => {
+      if (!socket) {
+        reject(new Error("Socket not connected"));
+        return;
+      }
 
-    const handleNewChat = (chat: Chat) => {
-      setChats((prev) => {
-        const filtered = prev.filter((c) => c.id !== chat.id);
-        return [chat, ...filtered]; // останній зверху
+      socket.emit("getChats", {}, (response: Chat[] | ErrorResponse) => {
+        if (!response) {
+          reject(new Error("No response"));
+          return;
+        }
+
+        if (isErrorResponse(response)) {
+          reject(new Error(response.error));
+          return;
+        }
+
+        setChats(response);
+        resolve(response);
       });
-    };
-
-    socket.on("newChat", handleNewChat);
-
-    return () => {
-      socket.off("newChat", handleNewChat);
-    };
+    });
   }, [socket]);
 
-  const sendMessage = useCallback(
-    (content: string) => {
-      if (!socket || !chatId || !content.trim()) return;
+  const createDirectChat = useCallback(
+    (targetUserId: string): Promise<Chat> => {
+      return new Promise((resolve, reject) => {
+        if (!socket) {
+          reject(new Error("Socket not connected"));
+          return;
+        }
 
-      socket.emit("sendMessage", {
-        chatId,
-        content,
-      });
-    },
-    [socket, chatId]
-  );
+        if (!targetUserId) {
+          reject(new Error("Target user id is required"));
+          return;
+        }
+        socket.emit(
+          "createDirectChat",
+          { targetUserId },
+          (response: Chat | ErrorResponse) => {
+            if (!response) {
+              reject(new Error("No response"));
+              return;
+            }
 
-  const createChat = useCallback(
-    (userIds: string[], title?: string) => {
-      if (!socket) return;
+            if (isErrorResponse(response)) {
+              reject(new Error(response.error));
+              return;
+            }
 
-      socket.emit("createChat", {
-        userIds,
-        title,
+            setChats((prev) => {
+              const filtered = prev.filter((c) => c.id !== response.id);
+              return [response, ...filtered];
+            });
+
+            resolve(response);
+          }
+        );
       });
     },
     [socket]
   );
 
-  const getChats = useCallback(() => {
-    if (!socket) return;
+  const sendMessage = useCallback(
+    (content: string): Promise<Message> => {
+      return new Promise((resolve, reject) => {
+        if (!socket) {
+          reject(new Error("Socket not connected"));
+          return;
+        }
 
-    socket.emit("getChats", { userId: user?.id }, (response: Chat[]) => {
-      setChats(response || []);
-    });
-  }, [socket, user?.id]);
+        if (!chatId) {
+          reject(new Error("Chat id is required"));
+          return;
+        }
+
+        if (!content.trim()) {
+          reject(new Error("Message is empty"));
+          return;
+        }
+
+        socket.emit(
+          "sendMessage",
+          {
+            chatId,
+            content,
+          },
+          (response: Message | ErrorResponse) => {
+            if (!response) {
+              reject(new Error("No response"));
+              return;
+            }
+
+            if (isErrorResponse(response)) {
+              reject(new Error(response.error));
+              return;
+            }
+
+            resolve(response);
+          }
+        );
+      });
+    },
+    [socket, chatId]
+  );
 
   return {
     messages,
     chats,
-
-    sendMessage,
-    createChat,
     getChats,
-
+    createDirectChat,
+    sendMessage,
     setChats,
   };
 };

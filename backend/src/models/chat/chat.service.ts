@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Chat } from './entities/chat.entity';
 import { ChatParticipant } from '../chat-participant/entities/chat-participant.entity';
@@ -32,23 +32,6 @@ export class ChatService {
     });
   }
 
-  async getUserChats(userId: string) {
-    const chats = await this.dataSource
-      .getRepository(Chat)
-      .createQueryBuilder('chat')
-      .innerJoin(
-        'chat.participants',
-        'participant',
-        'participant.userId = :userId AND participant.isActive = true',
-        { userId },
-      )
-      .leftJoinAndSelect('chat.participants', 'participants')
-      .leftJoinAndSelect('participants.user', 'user')
-      .getMany();
-
-    return chats;
-  }
-
   async createMessage(chatId: string, senderId: string, content: string) {
     const messageRepo = this.dataSource.getRepository('Message');
     const message = messageRepo.create({
@@ -59,5 +42,95 @@ export class ChatService {
     });
     await messageRepo.save(message);
     return message;
+  }
+
+  async findOrCreateDirectChat(currentUserId: string, targetUserId: string) {
+    if (!currentUserId || !targetUserId) {
+      throw new BadRequestException('Both users are required');
+    }
+
+    if (currentUserId === targetUserId) {
+      throw new BadRequestException('Cannot create chat with yourself');
+    }
+
+    const existingChats = await this.dataSource
+      .getRepository(Chat)
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.participants', 'participant')
+      .where('participant.userId IN (:...userIds)', {
+        userIds: [currentUserId, targetUserId],
+      })
+      .getMany();
+
+    const existingDirectChat = existingChats.find(chat => {
+      if (!chat.participants || chat.participants.length !== 2) return false;
+
+      const ids = chat.participants.map(p => p.userId).sort();
+      const expected = [currentUserId, targetUserId].sort();
+
+      return ids[0] === expected[0] && ids[1] === expected[1];
+    });
+
+    if (existingDirectChat) {
+      return existingDirectChat;
+    }
+
+    const chat = this.dataSource.getRepository(Chat).create({
+      title: undefined,
+    });
+
+    const savedChat = await this.dataSource.getRepository(Chat).save(chat);
+
+    const participants = this.dataSource.getRepository(ChatParticipant).create([
+      {
+        chatId: savedChat.id,
+        userId: currentUserId,
+      },
+      {
+        chatId: savedChat.id,
+        userId: targetUserId,
+      },
+    ]);
+
+    await this.dataSource.getRepository(ChatParticipant).save(participants);
+
+    return this.dataSource.getRepository(Chat).findOne({
+      where: { id: savedChat.id },
+      relations: {
+        participants: true,
+      },
+    });
+  }
+
+  async getUserChats(userId: string) {
+    const chatsRaw = await this.dataSource
+      .getRepository(Chat)
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.participants', 'participant')
+      .leftJoinAndSelect('participant.user', 'user')
+      .innerJoin('chat.participants', 'myParticipant', 'myParticipant.userId = :userId', { userId })
+      .orderBy('chat.updatedAt', 'DESC')
+      .getMany();
+
+    const chats = chatsRaw.map(chat => {
+      const otherParticipant = chat.participants.find(p => p.userId !== userId);
+
+      return {
+        ...chat,
+        title: otherParticipant?.user?.fullName || chat.title || '-',
+      };
+    });
+
+    return chats;
+  }
+  async isParticipant(chatId: string, userId: string) {
+    const participant = await this.dataSource.getRepository(ChatParticipant).findOne({
+      where: {
+        chatId,
+        userId,
+      },
+    });
+
+    return !!participant;
   }
 }

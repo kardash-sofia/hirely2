@@ -3,12 +3,12 @@ import { ChatHeader } from "./ChatHeader";
 import { MessagesList } from "./MessagesList";
 import { MessageInput } from "./MessageInput";
 import { useChat } from "../useChat";
+import type { Chat } from "../types";
 
-export const ChatWindow = ({ chatId }: { chatId: string }) => {
+export const ChatWindow = ({ chatId, chats }: { chatId: string; chats: Chat[] }) => {
   const {
     messages,
     sendMessage,
-    chats,
   } = useChat(chatId);
 
   const chat = chats.find((c) => c.id === chatId);

@@ -11,4 +11,5 @@ export type Chat = {
   title: string;
   online: boolean;
   createdAt?: string | Date; 
+  participants: string[];
 };

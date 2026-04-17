@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetProjectsQueryDto } from './dto/get-projects.dto';
+import { JwtAuthGuard } from 'src/common/jwt/jwt-auth.guard';
 
 @Controller('projects')
 export class ProjectController {
@@ -13,8 +14,10 @@ export class ProjectController {
   }
 
   @Post()
-  async create(@Body() dto: CreateProjectDto) {
-    const ownerId = '098d10c2-b014-4a3d-b650-2fe4ee453785';
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() dto: CreateProjectDto, @Req() req: any) {
+    console.log(req.user);
+    const ownerId = req.user.userId;
     return this.projectService.createProject(dto, ownerId);
   }
 

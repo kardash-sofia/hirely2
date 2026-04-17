@@ -29,6 +29,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const token = client.handshake.auth.token;
 
+      if (!token) {
+        client.disconnect();
+        return;
+      }
+
       const user = this.jwtService.verify(token);
 
       client.data.user = user;
@@ -43,40 +48,100 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('Disconnected:', client.id);
   }
 
-  @SubscribeMessage('createChat')
-  async handleCreateChat(
+  @SubscribeMessage('createDirectChat')
+  async handleCreateDirectChat(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { userIds: string[]; title?: string },
+    @MessageBody() payload: { targetUserId: string },
   ) {
-    const chat = await this.chatService.createChat(payload.userIds, payload.title);
+    try {
+      const currentUserId = client.data.user?.sub;
 
-    chat?.participants.forEach(p => {
-      this.server.to(`user:${p.userId}`).emit('newChat', chat);
-    });
+      if (!currentUserId) {
+        return { error: 'Unauthorized' };
+      }
 
-    return chat;
+      if (!payload?.targetUserId) {
+        return { error: 'targetUserId is required' };
+      }
+
+      const chat = await this.chatService.findOrCreateDirectChat(
+        currentUserId,
+        payload.targetUserId,
+      );
+
+      chat?.participants.forEach(p => {
+        this.server.to(`user:${p.userId}`).emit('newChat', chat);
+      });
+
+      return chat;
+    } catch (error) {
+      console.error('createDirectChat error:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Something went wrong',
+      };
+    }
   }
 
   @SubscribeMessage('getChats')
-  async handleGetChats(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { userId: string },
-  ) {
-    const chats = await this.chatService.getUserChats(payload.userId);
-    return chats;
+  async handleGetChats(@ConnectedSocket() client: Socket) {
+    try {
+      const currentUserId = client.data.user?.sub;
+
+      if (!currentUserId) {
+        return { error: 'Unauthorized' };
+      }
+
+      const chats = await this.chatService.getUserChats(currentUserId);
+      return chats;
+    } catch (error) {
+      console.error('getChats error:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Something went wrong',
+      };
+    }
   }
 
   @SubscribeMessage('joinChat')
   async handleJoinChat(@MessageBody() chatId: string, @ConnectedSocket() client: Socket) {
-    client.join(`chat:${chatId}`);
-    const messages = await this.messageService.getMessages(chatId);
+    try {
+      const currentUserId = client.data.user?.sub;
 
-    client.emit('chatMessages', messages);
+      if (!currentUserId) {
+        return { error: 'Unauthorized' };
+      }
+
+      if (!chatId) {
+        return { error: 'chatId is required' };
+      }
+
+      const hasAccess = await this.chatService.isParticipant(chatId, currentUserId);
+
+      if (!hasAccess) {
+        return { error: 'Access denied' };
+      }
+
+      await client.join(`chat:${chatId}`);
+
+      const messages = await this.messageService.getMessages(chatId);
+      client.emit('chatMessages', messages);
+
+      return { success: true };
+    } catch (error) {
+      console.error('joinChat error:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Something went wrong',
+      };
+    }
   }
 
   @SubscribeMessage('leaveChat')
   handleLeaveChat(@ConnectedSocket() client: Socket, @MessageBody() chatId: string) {
+    if (!chatId) {
+      return { error: 'chatId is required' };
+    }
+
     client.leave(`chat:${chatId}`);
+    return { success: true };
   }
 
   @SubscribeMessage('sendMessage')
@@ -84,22 +149,48 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { chatId: string; content: string },
   ) {
-    const user = client.data.user;
+    try {
+      const currentUserId = client.data.user?.sub;
 
-    const messageId = await this.chatService.createMessage(
-      payload.chatId,
-      user.sub,
-      payload.content,
-    );
+      if (!currentUserId) {
+        return { error: 'Unauthorized' };
+      }
 
-    const message = {
-      id: messageId,
-      chatId: payload.chatId,
-      content: payload.content,
-      senderId: user.sub,
-    };
-    this.server.to(`chat:${payload.chatId}`).emit('newMessage', message);
+      if (!payload?.chatId) {
+        return { error: 'chatId is required' };
+      }
 
-    return message;
+      if (!payload?.content?.trim()) {
+        return { error: 'Message content is required' };
+      }
+
+      const hasAccess = await this.chatService.isParticipant(payload.chatId, currentUserId);
+
+      if (!hasAccess) {
+        return { error: 'Access denied' };
+      }
+
+      const messageId = await this.chatService.createMessage(
+        payload.chatId,
+        currentUserId,
+        payload.content,
+      );
+
+      const message = {
+        id: messageId,
+        chatId: payload.chatId,
+        content: payload.content,
+        senderId: currentUserId,
+      };
+
+      this.server.to(`chat:${payload.chatId}`).emit('newMessage', message);
+
+      return message;
+    } catch (error) {
+      console.error('sendMessage error:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Something went wrong',
+      };
+    }
   }
 }

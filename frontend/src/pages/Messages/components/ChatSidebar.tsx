@@ -6,33 +6,21 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import { useChat } from "../useChat";
-import { useAuth } from "../../Auth/useAuth";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import type { Chat } from "../types";
+
+type Props = {
+  chats: Chat[];
+  activeChatId?: string;
+  onCreateFakeChat?: () => void;
+};
 
 export const ChatSidebar = ({
-  activeChat,
-  setActiveChat,
-}: {
-  activeChat: string | null;
-  setActiveChat: (id: string) => void;
-}) => {
-  const { user } = useAuth();
-  const { createChat, chats, getChats } = useChat();
-
-  useEffect(() => {
-    if (!user) return;
-    getChats();
-  }, [user, getChats]);
-
-  const handleCreateFakeChat = () => {
-    if (!user) return;
-
-    createChat(
-      ["cbf13007-b1fc-40d5-aa3a-21ad5a65132c", user.id],
-      "ruslana"
-    );
-  };
+  chats,
+  activeChatId,
+  onCreateFakeChat,
+}: Props) => {
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -41,36 +29,31 @@ export const ChatSidebar = ({
         borderRight: "1px solid #eee",
         display: "flex",
         flexDirection: "column",
+        backgroundColor: "#fff",
       }}
     >
-      {/* HEADER */}
       <Box sx={{ p: 2, borderBottom: "1px solid #eee" }}>
         <Typography fontWeight={600}>Chats</Typography>
-
-        <Button
-          variant="outlined"
-          size="small"
-          sx={{ mt: 1 }}
-          onClick={handleCreateFakeChat}
-        >
-          Create Fake Chat
-        </Button>
       </Box>
 
-      {/* CHAT LIST */}
-      <List sx={{ flex: 1, overflowY: "auto" }}>
+      <List sx={{ flex: 1, overflowY: "auto", p: 1 }}>
         {chats.map((chat) => (
           <ListItemButton
             key={chat.id}
-            selected={activeChat === chat.id}
-            onClick={() => setActiveChat(chat.id)}
+            selected={activeChatId === chat.id}
+            onClick={() => navigate(`/chats/${chat.id}`)}
+            sx={{
+              borderRadius: 3,
+              mb: 0.5,
+              alignItems: "center",
+            }}
           >
             <Avatar sx={{ mr: 2 }}>
               {chat.title?.[0]?.toUpperCase() || "?"}
             </Avatar>
 
-            <Box>
-              <Typography fontWeight={500}>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography fontWeight={500} noWrap>
                 {chat.title || "No title"}
               </Typography>
             </Box>

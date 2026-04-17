@@ -1,24 +1,36 @@
 import { Box, Container, Tabs, Tab } from "@mui/material";
 import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { OverviewTab } from "./components/tabs/OverviewTab";
 import { PortfolioTab } from "./components/tabs/PortfolioTab";
 import { SkillsTab } from "./components/tabs/SkillsTab";
-import { useParams } from "react-router-dom";
 import { useGetProfile } from "./hooks/useGetUser";
 import { Loader } from "../../common/Loader";
 import { Role } from "../Auth/types";
 import { ProjectsTab } from "./components/tabs/ProjectsTab";
+import { useAuth } from "../Auth/useAuth";
 
 export const ProfilePage = () => {
   const [tab, setTab] = useState(0);
 
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-  const { data, isLoading } = useGetProfile(id ?? '');
+  const { user: me } = useAuth();
+  const { data, isLoading } = useGetProfile(id ?? "");
+
   const isMe = id === "me";
+  const isFreelancer = data?.role === Role.FREELANCER;
 
-  const isFreelancer = (data?.role === Role.FREELANCER);
+  const handleMessage = ()=> {
+    if (!data?.id || !me?.id) return;
+      navigate(`/chats/newChat/${data.id}`);
+  };
+
+  if (isLoading) {
+    return <Loader loading={true} />;
+  }
 
   if (!data) {
     return (
@@ -31,13 +43,15 @@ export const ProfilePage = () => {
   return (
     <Box sx={{ background: "#f7f7fb", minHeight: "100vh", py: 4 }}>
       <Container maxWidth="md">
-
-      <Loader loading={isLoading} />
-
-      {data && <ProfileHeader user={data}  isEditing={isMe} />}
+        <ProfileHeader
+          user={data}
+          isEditing={isMe}
+          isMe={isMe}
+          onMessage={handleMessage}
+        />
 
         <Box sx={{ mt: 3, background: "#fff", borderRadius: 3, p: 2 }}>
-          <Tabs value={tab} onChange={(e, v) => setTab(v)}>
+          <Tabs value={tab} onChange={(_, v) => setTab(v)}>
             <Tab label="Projects" />
             {isFreelancer && <Tab label="Overview" />}
             {isFreelancer && <Tab label="Skills" />}
@@ -45,13 +59,16 @@ export const ProfilePage = () => {
           </Tabs>
 
           <Box sx={{ mt: 2 }}>
-            {tab === 0 && <ProjectsTab projects={isFreelancer ? data?.executedProjects : data?.ownedProjects} />}
-            {tab === 1 && <OverviewTab user={data} />}
-            {tab === 2 && <SkillsTab />}
-            {tab === 3 && <PortfolioTab />}
+            {tab === 0 && (
+              <ProjectsTab
+                projects={isFreelancer ? data.executedProjects : data.ownedProjects}
+              />
+            )}
+            {tab === 1 && isFreelancer && <OverviewTab user={data} />}
+            {tab === 2 && isFreelancer && <SkillsTab />}
+            {tab === 3 && isFreelancer && <PortfolioTab />}
           </Box>
         </Box>
-
       </Container>
     </Box>
   );
