@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -12,6 +12,7 @@ import { GetProjectsQueryDto, ProjectDto, ProjectListItemDto } from './dto/get-p
 import { ConstantsDto } from './dto/constants.dto';
 import { Category } from '../category/entities/category.entity';
 import { Technology } from '../technology/entities/technology.entity';
+import { ProjectApplication } from '../project-application/entities/project-application.entity';
 
 @Injectable()
 export class ProjectService {
@@ -91,7 +92,6 @@ export class ProjectService {
   }
 
   async getProjectById(id: string) {
-    console.log('Getting project by ID:', id);
     const project = await this.dataSource.getRepository(Project).findOne({
       where: { id },
       relations: [
@@ -196,5 +196,31 @@ export class ProjectService {
         name: pt.name,
       })),
     };
+  }
+
+  async getProjectApplications(projectId: string, userId: string) {
+    const project = await this.dataSource.getRepository(Project).findOne({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    if (project.ownerId !== userId) {
+      throw new ForbiddenException('You can view applications only for your own project');
+    }
+
+    return this.dataSource.getRepository(ProjectApplication).find({
+      where: { projectId },
+      relations: {
+        freelancer: {
+          authUser: true,
+        },
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 }

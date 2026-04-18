@@ -16,7 +16,6 @@ export class ProjectController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async create(@Body() dto: CreateProjectDto, @Req() req: any) {
-    console.log(req.user);
     const ownerId = req.user.userId;
     return this.projectService.createProject(dto, ownerId);
   }
@@ -29,5 +28,12 @@ export class ProjectController {
   @Get('constants')
   async getConstants() {
     return await this.projectService.getProjectConstants();
+  }
+
+  @Get(':projectId/applications')
+  @UseGuards(JwtAuthGuard)
+  getProjectApplications(@Param('projectId') projectId: string, @Req() req: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.projectService.getProjectApplications(projectId, req.user.userId);
   }
 }

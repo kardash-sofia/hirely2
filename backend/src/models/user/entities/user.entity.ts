@@ -4,6 +4,7 @@ import { Roles } from '../constants';
 import { AuthUser } from '../../auth/entities/auth.entity';
 import { Project } from '../../project/entities/project.entity';
 import { FreelancerProfile } from '../../freelancer-profile/entities/freelancer-profile.entity';
+import { ProjectApplication } from '../../project-application/entities/project-application.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -31,4 +32,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Project, project => project.executor)
   executedProjects: Project[];
+
+  @OneToMany(() => ProjectApplication, application => application.freelancer)
+  applications: ProjectApplication[];
 }

@@ -5,6 +5,7 @@ import { ProjectsModule } from './models/project/project.module';
 import { AuthModule } from './models/auth/auth.module';
 import { ChatModule } from './models/chat/chat.module';
 import { MessageModule } from './models/message/message.module';
+import { ProjectApplicationModule } from './models/project-application/project-application.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { MessageModule } from './models/message/message.module';
     AuthModule,
     ChatModule,
     MessageModule,
+    ProjectApplicationModule,
   ],
   controllers: [],
   providers: [],

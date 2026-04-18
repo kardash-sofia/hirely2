@@ -10,6 +10,7 @@ import { Loader } from "../../common/Loader";
 import { Role } from "../Auth/types";
 import { ProjectsTab } from "./components/tabs/ProjectsTab";
 import { useAuth } from "../Auth/useAuth";
+import { ApplicationsTab } from "./components/tabs/ApplicationsTab";
 
 export const ProfilePage = () => {
   const [tab, setTab] = useState(0);
@@ -54,6 +55,7 @@ export const ProfilePage = () => {
           <Tabs value={tab} onChange={(_, v) => setTab(v)}>
             <Tab label="Projects" />
             {isFreelancer && <Tab label="Overview" />}
+            {isFreelancer && <Tab label="Applications" />}
             {isFreelancer && <Tab label="Skills" />}
             {isFreelancer && <Tab label="Portfolio" />}
           </Tabs>
@@ -65,8 +67,9 @@ export const ProfilePage = () => {
               />
             )}
             {tab === 1 && isFreelancer && <OverviewTab user={data} />}
-            {tab === 2 && isFreelancer && <SkillsTab />}
-            {tab === 3 && isFreelancer && <PortfolioTab />}
+            {tab === 2 && isFreelancer && <ApplicationsTab />}
+            {tab === 3 && isFreelancer && <SkillsTab />}
+            {tab === 4 && isFreelancer && <PortfolioTab />}
           </Box>
         </Box>
       </Container>

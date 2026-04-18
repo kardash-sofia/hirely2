@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Chip, Stack, Avatar, Divider, Paper } from '@mui/material';
+import { Box, Container, Typography, Chip, Stack, Avatar, Divider, Paper, Button } from '@mui/material';
 import { Link as RouterLink } from "react-router-dom";
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -6,6 +6,14 @@ import { useParams } from 'react-router-dom';
 import { useGetProjectDetails } from '../hooks/useGetProjectDetails';
 import { Loader } from '../../../common/Loader';
 import { OwnerInfo } from '../components/OwnerInfo';
+import { useAuth } from '../../Auth/useAuth';
+import { Role } from '../../Auth/types';
+import { useGetProjectApplications } from '../hooks/useGetProjectApplications';
+import { ProjectStatus } from '../types';
+import { HorizontalScroll } from '../../../common/HorizontalScroll/HorizontalScroll';
+import { ApplicationCard } from '../../Profile/components/items/ApplicationCard';
+import { useState } from 'react';
+import { ApplyToProjectModal } from '../components/ApplyToProjectModal';
 
 const DUMMY_IMAGE = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2070';
 
@@ -13,7 +21,19 @@ export const ProjectDetailsPage = () => {
 
   const { id } = useParams<{ id: string }>();
 
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+
   const { data, isLoading } = useGetProjectDetails(id ?? '');
+
+  const { user } = useAuth();
+
+  const isOwner = user?.id === data?.owner?.id;
+  const isFreelancer = user?.role === Role.FREELANCER;
+
+  const { data: applications = [] } = useGetProjectApplications(
+    id ?? "",
+    !!id && isOwner,
+  );
 
   return (
     <Box>
@@ -55,13 +75,29 @@ export const ProjectDetailsPage = () => {
               sx={{ mt: 1, bgcolor: 'primary.main', color: '#fff' }}
             />
           </Box>
+          {isFreelancer && !isOwner && data?.status === ProjectStatus.OPEN && (
+            <Box sx={{ ml: "auto", alignSelf: "flex-end" }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => setIsApplyModalOpen(true)}
+                sx={{
+                  borderRadius: 999,
+                  px: 3,
+                  py: 1.2,
+                  fontWeight: 600,
+                }}
+              >
+                Apply to Project
+              </Button>
+            </Box>
+          )}
         </Container>
       </Box>
 
       {/* CONTENT */}
       <Container sx={{ mt: 4 }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={4}>
-
           {/* LEFT SIDE */}
           <Box flex={3}>
             <Paper sx={{ p: 3, borderRadius: 3 }} elevation={2}>
@@ -157,7 +193,34 @@ export const ProjectDetailsPage = () => {
             </Stack>
           </Box>
         </Stack>
+
+        {/* APPLICATIONS */}
+        {isOwner && (
+          <HorizontalScroll>
+            {applications.length ? (
+              applications.map((application) => (
+                <ApplicationCard
+                  key={application.id}
+                  application={application}
+                  mode="owner"
+                />
+              ))
+            ) : (
+              <Typography color="text.secondary">
+                No applications yet.
+              </Typography>
+            )}
+          </HorizontalScroll>
+        )}
       </Container>
+      {data?.id && (
+        <ApplyToProjectModal
+          open={isApplyModalOpen}
+          onClose={() => setIsApplyModalOpen(false)}
+          projectId={data.id}
+          projectTitle={data.title}
+        />
+      )}
     </Box>
   );
 };

@@ -5,6 +5,7 @@ import { ProjectTechnology } from '../../project-technology/entities/project-tec
 import { Task } from '../../task/entities/task.entity';
 import { ProjectStatus } from '../constants';
 import { User } from '../../user/entities/user.entity';
+import { ProjectApplication } from '../../project-application/entities/project-application.entity';
 
 @Entity('projects')
 export class Project extends BaseEntity {
@@ -48,4 +49,7 @@ export class Project extends BaseEntity {
 
   @OneToMany(() => ProjectTechnology, pt => pt.project)
   projectTechnologies: ProjectTechnology[];
+
+  @OneToMany(() => ProjectApplication, application => application.project)
+  applications: ProjectApplication[];
 }
