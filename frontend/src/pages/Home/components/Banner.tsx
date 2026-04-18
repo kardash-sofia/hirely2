@@ -34,14 +34,13 @@ export const Banner = () => {
             mb: 2,
           }}
         >
-          Um espaço abundante em mídias digitais
+          Plenty of space in digital media
         </Typography>
         <Typography
           variant="subtitle1"
           sx={{ color: '#fff', wordBreak: 'break-word' }}
         >
-          Encontre prestadores de serviços digitais ou ofereça seus próprios serviços. Todo projeto começa com uma ideia, nós facilitamos o resto...
-        </Typography>
+        Find digital service providers or offer your own skills. Every project starts with an idea — we take care of the rest.            </Typography>
       </Box>
     </Box>
   );

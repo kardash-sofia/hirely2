@@ -10,10 +10,10 @@ type Feature = {
 };
 
 const features: Feature[] = [
-  { icon: featureExplore, label: 'Cadastre-se e explore' },
-  { icon: featureSearch, label: 'Pesquise diversas áreas' },
-  { icon: featureDeal, label: 'Forme equipes' },
-  { icon: featureMission, label: 'Impulsione sua publicação' },
+  { icon: featureExplore, label: 'Sign up and explore' },
+  { icon: featureSearch, label: 'Browse different fields' },
+  { icon: featureDeal, label: 'Build your team' },
+  { icon: featureMission, label: 'Promote your project' },
 ];
 
 export const Features = () => (
@@ -24,7 +24,7 @@ export const Features = () => (
           variant="h1"
           sx={{ color: 'secondary.main', textShadow: '2px 2px 10px rgba(0,0,0,0.2)', textAlign: 'center' }}
         >
-          Tornamos sua jornada mais simples
+          We make your journey easier
         </Typography>
 
         <Grid container spacing={4} justifyContent="center">
@@ -47,7 +47,7 @@ export const Features = () => (
           variant="h3"
           sx={{ color: 'secondary.main', textShadow: '2px 2px 10px rgba(0,0,0,0.2)', textAlign: 'center' }}
         >
-          Nós existimos para facilitar sua divulgação e te ajudamos a achar o ✨brilho✨ do seu projeto.
+          We make it easier to share your work and uncover the ✨magic✨ of your project.
         </Typography>
       </Stack>
     </Container>

@@ -78,9 +78,9 @@ export const Sidebar: React.FC = () => {
 
   const menuItems = [
     { label: 'Home', icon: <HomeOutlined />, path: '/' },
-    { label: 'Projetos', icon: <FolderOutlined />, path: '/projects' },
-    { label: 'Mensagens', icon: <MessageOutlined />, path: '/messages' },
-    { label: 'Perfil', icon: <PersonOutline />, path: '/profile/me' },
+    { label: 'Projects', icon: <FolderOutlined />, path: '/projects' },
+    { label: 'Messages', icon: <MessageOutlined />, path: '/chats' },
+    { label: 'Profile', icon: <PersonOutline />, path: '/profile/me' },
   ];
 
   return (
@@ -117,8 +117,7 @@ export const Sidebar: React.FC = () => {
           {menuItems.map((item) => (
             <ListItemButton
               component={NavLink}
-              to={item.path}
-              end
+              to={item.path}        
               sx={menuItemStyles(open)}
             >
               <ListItemIcon
@@ -132,7 +131,7 @@ export const Sidebar: React.FC = () => {
           ))}
           <ListItemButton onClick={handleLogout} sx={menuItemStyles(open)}>
             <ListItemIcon sx={iconStyles(open)}><LogoutOutlined /></ListItemIcon>
-            {open && <ListItemText primary="Sair" primaryTypographyProps={{ variant: 'body2' }} />}
+            {open && <ListItemText primary="Log out" primaryTypographyProps={{ variant: 'body2' }} />}
           </ListItemButton>
         </List>
       </Drawer>

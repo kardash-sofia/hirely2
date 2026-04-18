@@ -31,8 +31,6 @@ export const AppRouter = () => {
             <Route path="/projects/create" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
             <Route path="/projects/:id/edit" element={<ProtectedRoute><EditProject /></ProtectedRoute>} />
 
-            <Route path="/messages/*" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
