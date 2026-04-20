@@ -1,226 +1,268 @@
-import { Box, Container, Typography, Chip, Stack, Avatar, Divider, Paper, Button } from '@mui/material';
-import { Link as RouterLink } from "react-router-dom";
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { useParams } from 'react-router-dom';
-import { useGetProjectDetails } from '../hooks/useGetProjectDetails';
-import { Loader } from '../../../common/Loader';
-import { OwnerInfo } from '../components/OwnerInfo';
-import { useAuth } from '../../Auth/useAuth';
-import { Role } from '../../Auth/types';
-import { useGetProjectApplications } from '../hooks/useGetProjectApplications';
-import { ProjectStatus } from '../types';
-import { HorizontalScroll } from '../../../common/HorizontalScroll/HorizontalScroll';
-import { ApplicationCard } from '../../Profile/components/items/ApplicationCard';
-import { useState } from 'react';
-import { ApplyToProjectModal } from '../components/ApplyToProjectModal';
+import {
+  Box,
+  Container,
+  Typography,
+  Chip,
+  Stack,
+  Avatar,
+  Divider,
+  Paper,
+  Grid,
+} from "@mui/material";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import { useParams } from "react-router-dom";
+import { useGetProjectDetails } from "../hooks/useGetProjectDetails";
+import { Loader } from "../../../common/Loader";
+import { OwnerInfo } from "../components/OwnerInfo";
+import { RecommendedFreelancers } from "../components/RecommendedFreelancers";
 
-const DUMMY_IMAGE = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2070';
+const DUMMY_IMAGE =
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2070";
 
 export const ProjectDetailsPage = () => {
-
   const { id } = useParams<{ id: string }>();
+  const { data, isLoading } = useGetProjectDetails(id ?? "");
 
-  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  if (isLoading) {
+    return <Loader loading={isLoading} />;
+  }
 
-  const { data, isLoading } = useGetProjectDetails(id ?? '');
-
-  const { user } = useAuth();
-
-  const isOwner = user?.id === data?.owner?.id;
-  const isFreelancer = user?.role === Role.FREELANCER;
-
-  const { data: applications = [] } = useGetProjectApplications(
-    id ?? "",
-    !!id && isOwner,
-  );
+  if (!data) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 5 }}>
+        <Typography variant="h5" fontWeight={800}>
+          Project not found
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
-    <Box>
-      {/* HEADER / COVER */}
-      <Loader loading={isLoading} />
-      <Box
-        sx={{
-          height: 260,
-          backgroundImage: `url(${DUMMY_IMAGE})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          position: 'relative',
-        }}
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.3), rgba(0,0,0,0.7))',
-          }}
-        />
-
-        <Container
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            height: '100%',
-            display: 'flex',
-            alignItems: 'flex-end',
-            pb: 3,
-          }}
-        >
-          <Box>
-            <Typography variant="h4" color="white" fontWeight={700}>
-              {data?.title}
-            </Typography>
-            <Chip
-              label={data?.status}
-              sx={{ mt: 1, bgcolor: 'primary.main', color: '#fff' }}
-            />
-          </Box>
-          {isFreelancer && !isOwner && data?.status === ProjectStatus.OPEN && (
-            <Box sx={{ ml: "auto", alignSelf: "flex-end" }}>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => setIsApplyModalOpen(true)}
-                sx={{
-                  borderRadius: 999,
-                  px: 3,
-                  py: 1.2,
-                  fontWeight: 600,
-                }}
-              >
-                Apply to Project
-              </Button>
-            </Box>
-          )}
-        </Container>
-      </Box>
-
-      {/* CONTENT */}
-      <Container sx={{ mt: 4 }}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4}>
-          {/* LEFT SIDE */}
-          <Box flex={3}>
-            <Paper sx={{ p: 3, borderRadius: 3 }} elevation={2}>
-              <Typography variant="h6" gutterBottom>
-                Description
-              </Typography>
-              <Typography color="text.secondary">
-                {data?.description || 'No description provided.'}
-              </Typography>
-
-              <Divider sx={{ my: 3 }} />
-
-              <Typography variant="h6" gutterBottom>
-                Technologies
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {data?.projectTechnologies?.map((t, i) => (
-                  <Chip key={i} label={t.name} variant="outlined" />
-                ))}
-              </Stack>
-
-              <Divider sx={{ my: 3 }} />
-
-              <Typography variant="h6" gutterBottom>
-                Categories
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {data?.projectCategories?.map((c, i) => (
-                  <Chip key={i} label={c.name} />
-                ))}
-              </Stack>
-            </Paper>
-          </Box>
-
-          {/* RIGHT SIDE */}
-          <Box flex={1}>
-            <Stack spacing={3}>
-
-              {/* BUDGET */}
-              <Paper sx={{ p: 2, borderRadius: 3 }}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <AttachMoneyIcon />
-                  <Typography fontWeight={600}>Budget</Typography>
-                </Stack>
-                <Typography color="text.secondary" mt={1}>
-                  {data?.budgetMin && data?.budgetMax
-                    ? `$${data.budgetMin} - $${data.budgetMax}`
-                    : 'Not specified'}
-                </Typography>
-              </Paper>
-
-              {/* DEADLINE */}
-              <Paper sx={{ p: 2, borderRadius: 3 }}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <CalendarTodayIcon />
-                  <Typography fontWeight={600}>Deadline</Typography>
-                </Stack>
-                <Typography color="text.secondary" mt={1}>
-                  {data?.dueDate || 'No deadline'}
-                </Typography>
-              </Paper>
-
-              {/* OWNER */}
-              {data?.owner ? (
+    <Box sx={{ bgcolor: "#F8FAFC", minHeight: "100vh", py: 4 }}>
+      <Container maxWidth="lg">
+        <Stack spacing={3}>
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 5,
+              overflow: "hidden",
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box
+              sx={{
+                height: 240,
+                backgroundImage: `url(${DUMMY_IMAGE})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                position: "relative",
+              }}
+            >
               <Box
-                component={RouterLink}
-                to={`/profile/${data.owner.id}`}
                 sx={{
-                  textDecoration: "none",
-                  color: "inherit",
-                  cursor: "pointer",
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, rgba(15,23,42,0.20) 0%, rgba(15,23,42,0.78) 100%)",
+                }}
+              />
+              <Stack
+                spacing={2}
+                sx={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  p: { xs: 2, md: 4 },
                 }}
               >
-                <Paper sx={{ p: 2, borderRadius: 3, "&:hover": { boxShadow: 4 } }}>
-                  <OwnerInfo owner={data.owner} />
-                </Paper>
-              </Box>
-            ) : (
-              <Typography>No owner information</Typography>
-            )}
+                <Typography
+                  variant="h3"
+                  fontWeight={900}
+                  color="#fff"
+                  sx={{ maxWidth: 900 }}
+                >
+                  {data.title}
+                </Typography>
 
-              {/* EXECUTOR */}
-              {data?.executor && (
-                <Paper sx={{ p: 2, borderRadius: 3 }}>
-                  <Typography fontWeight={600}>Executor</Typography>
-                  <Stack direction="row" spacing={2} alignItems="center" mt={1}>
-                    <Avatar src={data.executor.fullName} />
-                    <Typography>{data.executor.email}</Typography>
+                <Stack direction="row" gap={1} flexWrap="wrap" useFlexGap>
+                  {data.projectCategories?.map((c, i) => (
+                    <Chip
+                      key={`${c.name}-${i}`}
+                      label={c.name}
+                      sx={{
+                        bgcolor: "rgba(255,255,255,0.14)",
+                        color: "#fff",
+                        backdropFilter: "blur(8px)",
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </Stack>
+            </Box>
+          </Paper>
+
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, lg: 8 }}>
+              <Stack spacing={3}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 4,
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Typography variant="h5" fontWeight={800} mb={2}>
+                    Description
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{ whiteSpace: "pre-line", lineHeight: 1.8 }}
+                  >
+                    {data.description || "No description provided."}
+                  </Typography>
+                </Paper>
+
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 4,
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Typography variant="h6" fontWeight={800} mb={2}>
+                    Technologies
+                  </Typography>
+
+                  <Stack direction="row" gap={1} flexWrap="wrap" useFlexGap>
+                    {data.projectTechnologies?.length ? (
+                      data.projectTechnologies.map((t, i) => (
+                        <Chip
+                          key={`${t.name}-${i}`}
+                          label={t.name}
+                          color="primary"
+                          variant="outlined"
+                        />
+                      ))
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No technologies specified.
+                      </Typography>
+                    )}
+                  </Stack>
+
+                  <Divider sx={{ my: 3 }} />
+
+                  <Typography variant="h6" fontWeight={800} mb={2}>
+                    Categories
+                  </Typography>
+
+                  <Stack direction="row" gap={1} flexWrap="wrap" useFlexGap>
+                    {data.projectCategories?.length ? (
+                      data.projectCategories.map((c, i) => (
+                        <Chip key={`${c.name}-${i}`} label={c.name} />
+                      ))
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No categories specified.
+                      </Typography>
+                    )}
                   </Stack>
                 </Paper>
-              )}
+              </Stack>
+            </Grid>
 
-            </Stack>
-          </Box>
+            <Grid size={{ xs: 12, lg: 4 }}>
+              <Stack spacing={3}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 4,
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Stack spacing={2.5}>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                        Budget
+                      </Typography>
+
+                      <Stack direction="row" spacing={1.2} alignItems="center">
+                        <Avatar sx={{ bgcolor: "primary.light", color: "primary.main" }}>
+                          <AttachMoneyIcon />
+                        </Avatar>
+                        <Typography variant="h6" fontWeight={800}>
+                          {data.budgetMin && data.budgetMax
+                            ? `$${data.budgetMin} - $${data.budgetMax}`
+                            : "Not specified"}
+                        </Typography>
+                      </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                        Deadline
+                      </Typography>
+
+                      <Stack direction="row" spacing={1.2} alignItems="center">
+                        <Avatar sx={{ bgcolor: "secondary.light", color: "secondary.main" }}>
+                          <CalendarTodayIcon />
+                        </Avatar>
+                        <Typography variant="body1" fontWeight={700}>
+                          {data.dueDate || "No deadline"}
+                        </Typography>
+                      </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" mb={1.5}>
+                        Owner
+                      </Typography>
+
+                      {data.owner ? (
+                        <OwnerInfo owner={data.owner} />
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          No owner information
+                        </Typography>
+                      )}
+                    </Box>
+
+                    {data.executor && (
+                      <>
+                        <Divider />
+                        <Box>
+                          <Typography variant="subtitle2" color="text.secondary" mb={1}>
+                            Executor
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {data.executor.email}
+                          </Typography>
+                        </Box>
+                      </>
+                    )}
+                  </Stack>
+                </Paper>
+
+                <RecommendedFreelancers projectId={data.id} />
+              </Stack>
+            </Grid>
+          </Grid>
         </Stack>
-
-        {/* APPLICATIONS */}
-        {isOwner && (
-          <HorizontalScroll>
-            {applications.length ? (
-              applications.map((application) => (
-                <ApplicationCard
-                  key={application.id}
-                  application={application}
-                  mode="owner"
-                />
-              ))
-            ) : (
-              <Typography color="text.secondary">
-                No applications yet.
-              </Typography>
-            )}
-          </HorizontalScroll>
-        )}
       </Container>
-      {data?.id && (
-        <ApplyToProjectModal
-          open={isApplyModalOpen}
-          onClose={() => setIsApplyModalOpen(false)}
-          projectId={data.id}
-          projectTitle={data.title}
-        />
-      )}
     </Box>
   );
 };

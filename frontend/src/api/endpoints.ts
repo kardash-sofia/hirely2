@@ -30,4 +30,9 @@ export const endpoints = {
     predictCategory: "/ai/predict-category",
     generateDescription: "/ai/generate-description",
   },
+
+  recommendations: {
+    freelancersForProject: (projectId: string) =>
+      `/recommendations/projects/${projectId}/freelancers`,
+  },
 };
