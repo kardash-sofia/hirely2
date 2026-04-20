@@ -24,4 +24,10 @@ export const endpoints = {
     accept: (id: string) => `/project-applications/${id}/accept`,
     reject: (id: string) => `/project-applications/${id}/reject`,
   },
+
+  ai: {
+    predictBudget: "/ai/predict-budget",
+    predictCategory: "/ai/predict-category",
+    generateDescription: "/ai/generate-description",
+  },
 };
