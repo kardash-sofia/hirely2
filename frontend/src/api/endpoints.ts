@@ -10,6 +10,13 @@ export const endpoints = {
     constants: "/projects/constants",
     create: "/projects",
     applications: (projectId: string) => `/projects/${projectId}/applications`,
+    myApplication: (projectId: string) => `/projects/${projectId}/my-application`,
+    submitForReview: (projectId: string) =>
+      `/projects/${projectId}/submit-for-review`,
+    requestRework: (projectId: string) =>
+      `/projects/${projectId}/request-rework`,
+    complete: (projectId: string) => `/projects/${projectId}/complete`,
+    cancel: (projectId: string) => `/projects/${projectId}/cancel`,
   },
 
   profile: {

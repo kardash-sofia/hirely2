@@ -1,6 +1,12 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
+
 import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from './entities/project.entity';
 import { Task } from '../task/entities/task.entity';
@@ -13,6 +19,7 @@ import { ConstantsDto } from './dto/constants.dto';
 import { Category } from '../category/entities/category.entity';
 import { Technology } from '../technology/entities/technology.entity';
 import { ProjectApplication } from '../project-application/entities/project-application.entity';
+import { ApplicationStatus } from '../project-application/types';
 
 @Injectable()
 export class ProjectService {
@@ -25,8 +32,8 @@ export class ProjectService {
       status,
       categories,
       technologies,
-      sortField,
-      sortOrder,
+      sortField = 'createdAt',
+      sortOrder = 'DESC',
     } = query;
 
     const qb = this.dataSource
@@ -52,21 +59,24 @@ export class ProjectService {
     }
 
     if (categoriesArray?.length) {
-      qb.andWhere('category.id IN (:...categories)', { categories: categoriesArray });
+      qb.andWhere('category.id IN (:...categories)', {
+        categories: categoriesArray,
+      });
     }
 
     if (technologiesArray?.length) {
-      qb.andWhere('technology.id IN (:...technologies)', { technologies: technologiesArray });
+      qb.andWhere('technology.id IN (:...technologies)', {
+        technologies: technologiesArray,
+      });
     }
 
     qb.take(limit);
     qb.skip(offset);
-
     qb.addOrderBy(`project.${sortField}`, sortOrder);
 
     const [projects, total] = await qb.getManyAndCount();
 
-    const items: ProjectListItemDto[] = projects?.map(project => {
+    const items: ProjectListItemDto[] = projects.map(project => {
       const dto: ProjectDto = {
         id: project.id,
         title: project.title,
@@ -113,19 +123,28 @@ export class ProjectService {
 
     return {
       ...project,
-      projectCategories: project.projectCategories?.map(pc => ({
-        id: pc.category.id,
-        name: pc.category.name,
-      })),
-      projectTechnologies: project.projectTechnologies?.map(pt => ({
-        id: pt.technology.id,
-        name: pt.technology.name,
-      })),
+      projectCategories:
+        project.projectCategories?.map(pc => ({
+          id: pc.category.id,
+          name: pc.category.name,
+        })) ?? [],
+      projectTechnologies:
+        project.projectTechnologies?.map(pt => ({
+          id: pt.technology.id,
+          name: pt.technology.name,
+        })) ?? [],
       owner: {
         id: project.owner?.id,
         fullName: project.owner?.fullName,
         email: project.owner?.authUser?.email,
       },
+      executor: project.executor
+        ? {
+            id: project.executor.id,
+            fullName: project.executor.fullName,
+            email: project.executor.authUser?.email,
+          }
+        : null,
     };
   }
 
@@ -151,29 +170,26 @@ export class ProjectService {
             status: TaskStatus.DRAFT,
           }),
         );
-
         await manager.save(tasks);
       }
 
       if (dto.categoryIds?.length) {
-        const pcs = dto.categoryIds.map(catId =>
+        const pcs = dto.categoryIds.map(categoryId =>
           manager.create(ProjectCategory, {
             projectId: project.id,
-            categoryId: catId,
+            categoryId,
           }),
         );
-
         await manager.save(pcs);
       }
 
       if (dto.technologyIds?.length) {
-        const pts = dto.technologyIds.map(techId =>
+        const pts = dto.technologyIds.map(technologyId =>
           manager.create(ProjectTechnology, {
             projectId: project.id,
-            technologyId: techId,
+            technologyId,
           }),
         );
-
         await manager.save(pts);
       }
 
@@ -183,18 +199,11 @@ export class ProjectService {
 
   async getProjectConstants(): Promise<ConstantsDto> {
     const categories = await this.dataSource.getRepository(Category).find();
-
     const technologies = await this.dataSource.getRepository(Technology).find();
 
     return {
-      categories: categories?.map(pc => ({
-        id: pc.id,
-        name: pc.name,
-      })),
-      technologies: technologies?.map(pt => ({
-        id: pt.id,
-        name: pt.name,
-      })),
+      categories: categories.map(item => ({ id: item.id, name: item.name })),
+      technologies: technologies.map(item => ({ id: item.id, name: item.name })),
     };
   }
 
@@ -214,13 +223,200 @@ export class ProjectService {
     return this.dataSource.getRepository(ProjectApplication).find({
       where: { projectId },
       relations: {
-        freelancer: {
-          authUser: true,
-        },
+        freelancer: { authUser: true },
       },
-      order: {
-        createdAt: 'DESC',
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getMyProjectApplication(projectId: string, userId: string) {
+    return this.dataSource.getRepository(ProjectApplication).findOne({
+      where: {
+        projectId,
+        freelancerId: userId,
       },
+      relations: {
+        project: true,
+      },
+    });
+  }
+
+  async submitForReview(projectId: string, userId: string) {
+    return this.dataSource.transaction(async manager => {
+      const projectRepo = manager.getRepository(Project);
+      const taskRepo = manager.getRepository(Task);
+
+      const project = await projectRepo.findOne({
+        where: { id: projectId },
+      });
+
+      if (!project) {
+        throw new NotFoundException('Project not found');
+      }
+
+      if (project.executorId !== userId) {
+        throw new ForbiddenException('Only assigned executor can submit project for review');
+      }
+
+      if (project.status !== ProjectStatus.IN_PROGRESS) {
+        throw new BadRequestException('Only projects in progress can be submitted for review');
+      }
+
+      await projectRepo.update(project.id, {
+        status: ProjectStatus.PENDING_REVIEW,
+      });
+
+      await taskRepo
+        .createQueryBuilder()
+        .update(Task)
+        .set({ status: TaskStatus.IN_REVIEW })
+        .where('projectId = :projectId', { projectId })
+        .andWhere('status IN (:...statuses)', {
+          statuses: [TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.ON_HOLD],
+        })
+        .execute();
+
+      return projectRepo.findOne({ where: { id: projectId } });
+    });
+  }
+
+  async requestRework(projectId: string, userId: string) {
+    return this.dataSource.transaction(async manager => {
+      const projectRepo = manager.getRepository(Project);
+      const taskRepo = manager.getRepository(Task);
+
+      const project = await projectRepo.findOne({
+        where: { id: projectId },
+      });
+
+      if (!project) {
+        throw new NotFoundException('Project not found');
+      }
+
+      if (project.ownerId !== userId) {
+        throw new ForbiddenException('Only project owner can request rework');
+      }
+
+      if (project.status !== ProjectStatus.PENDING_REVIEW) {
+        throw new BadRequestException('Only projects pending review can be returned for rework');
+      }
+
+      await projectRepo.update(project.id, {
+        status: ProjectStatus.IN_PROGRESS,
+      });
+
+      await taskRepo
+        .createQueryBuilder()
+        .update(Task)
+        .set({ status: TaskStatus.IN_PROGRESS })
+        .where('projectId = :projectId', { projectId })
+        .andWhere('status = :status', { status: TaskStatus.IN_REVIEW })
+        .execute();
+
+      return projectRepo.findOne({ where: { id: projectId } });
+    });
+  }
+
+  async completeProject(projectId: string, userId: string) {
+    return this.dataSource.transaction(async manager => {
+      const projectRepo = manager.getRepository(Project);
+      const taskRepo = manager.getRepository(Task);
+
+      const project = await projectRepo.findOne({
+        where: { id: projectId },
+      });
+
+      if (!project) {
+        throw new NotFoundException('Project not found');
+      }
+
+      if (project.ownerId !== userId) {
+        throw new ForbiddenException('Only project owner can complete this project');
+      }
+
+      if (project.status !== ProjectStatus.PENDING_REVIEW) {
+        throw new BadRequestException('Only projects pending review can be completed');
+      }
+
+      await projectRepo.update(project.id, {
+        status: ProjectStatus.COMPLETED,
+      });
+
+      await taskRepo
+        .createQueryBuilder()
+        .update(Task)
+        .set({ status: TaskStatus.COMPLETED })
+        .where('projectId = :projectId', { projectId })
+        .andWhere('status IN (:...statuses)', {
+          statuses: [
+            TaskStatus.TODO,
+            TaskStatus.IN_PROGRESS,
+            TaskStatus.ON_HOLD,
+            TaskStatus.IN_REVIEW,
+            TaskStatus.DRAFT,
+          ],
+        })
+        .execute();
+
+      return projectRepo.findOne({ where: { id: projectId } });
+    });
+  }
+
+  async cancelProject(projectId: string, userId: string) {
+    return this.dataSource.transaction(async manager => {
+      const projectRepo = manager.getRepository(Project);
+      const taskRepo = manager.getRepository(Task);
+      const applicationRepo = manager.getRepository(ProjectApplication);
+
+      const project = await projectRepo.findOne({
+        where: { id: projectId },
+      });
+
+      if (!project) {
+        throw new NotFoundException('Project not found');
+      }
+
+      if (project.ownerId !== userId) {
+        throw new ForbiddenException('Only project owner can cancel this project');
+      }
+
+      if (
+        ![ProjectStatus.OPEN, ProjectStatus.IN_PROGRESS, ProjectStatus.PENDING_REVIEW].includes(
+          project.status,
+        )
+      ) {
+        throw new BadRequestException('This project cannot be cancelled from current status');
+      }
+
+      await projectRepo.update(project.id, {
+        status: ProjectStatus.CANCELLED,
+      });
+
+      await taskRepo
+        .createQueryBuilder()
+        .update(Task)
+        .set({ status: TaskStatus.CANCELLED })
+        .where('projectId = :projectId', { projectId })
+        .andWhere('status IN (:...statuses)', {
+          statuses: [
+            TaskStatus.DRAFT,
+            TaskStatus.TODO,
+            TaskStatus.IN_PROGRESS,
+            TaskStatus.ON_HOLD,
+            TaskStatus.IN_REVIEW,
+          ],
+        })
+        .execute();
+
+      await applicationRepo
+        .createQueryBuilder()
+        .update(ProjectApplication)
+        .set({ status: ApplicationStatus.REJECTED })
+        .where('projectId = :projectId', { projectId })
+        .andWhere('status = :status', { status: ApplicationStatus.PENDING })
+        .execute();
+
+      return projectRepo.findOne({ where: { id: projectId } });
     });
   }
 }

@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { GetProjectsQueryDto } from './dto/get-projects.dto';
 import { JwtAuthGuard } from 'src/common/jwt/jwt-auth.guard';
+import { TransitionProjectDto } from './dto/transition-project.dto';
 
 @Controller('projects')
 export class ProjectController {
@@ -16,8 +17,7 @@ export class ProjectController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async create(@Body() dto: CreateProjectDto, @Req() req: any) {
-    const ownerId = req.user.userId;
-    return this.projectService.createProject(dto, ownerId);
+    return this.projectService.createProject(dto, req.user.userId);
   }
 
   @Get()
@@ -27,13 +27,62 @@ export class ProjectController {
 
   @Get('constants')
   async getConstants() {
-    return await this.projectService.getProjectConstants();
+    return this.projectService.getProjectConstants();
   }
 
   @Get(':projectId/applications')
   @UseGuards(JwtAuthGuard)
   getProjectApplications(@Param('projectId') projectId: string, @Req() req: any) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.projectService.getProjectApplications(projectId, req.user.userId);
+  }
+
+  @Get(':projectId/my-application')
+  @UseGuards(JwtAuthGuard)
+  getMyProjectApplication(@Param('projectId') projectId: string, @Req() req: any) {
+    return this.projectService.getMyProjectApplication(projectId, req.user.userId);
+  }
+
+  @Patch(':projectId/submit-for-review')
+  @UseGuards(JwtAuthGuard)
+  submitForReview(
+    @Param('projectId') projectId: string,
+    @Req() req: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Body() _dto: TransitionProjectDto,
+  ) {
+    return this.projectService.submitForReview(projectId, req.user.userId);
+  }
+
+  @Patch(':projectId/request-rework')
+  @UseGuards(JwtAuthGuard)
+  requestRework(
+    @Param('projectId') projectId: string,
+    @Req() req: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Body() _dto: TransitionProjectDto,
+  ) {
+    return this.projectService.requestRework(projectId, req.user.userId);
+  }
+
+  @Patch(':projectId/complete')
+  @UseGuards(JwtAuthGuard)
+  completeProject(
+    @Param('projectId') projectId: string,
+    @Req() req: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Body() _dto: TransitionProjectDto,
+  ) {
+    return this.projectService.completeProject(projectId, req.user.userId);
+  }
+
+  @Patch(':projectId/cancel')
+  @UseGuards(JwtAuthGuard)
+  cancelProject(
+    @Param('projectId') projectId: string,
+    @Req() req: any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Body() _dto: TransitionProjectDto,
+  ) {
+    return this.projectService.cancelProject(projectId, req.user.userId);
   }
 }

@@ -6,11 +6,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+
 import { CreateProjectApplicationDto } from './dto/create-project-application.dto';
 import { Project } from '../project/entities/project.entity';
 import { ProjectStatus } from '../project/constants';
 import { ProjectApplication } from './entities/project-application.entity';
 import { ApplicationStatus } from './types';
+import { Task } from '../task/entities/task.entity';
+import { TaskStatus } from '../task/constants';
 
 @Injectable()
 export class ProjectApplicationService {
@@ -24,6 +27,10 @@ export class ProjectApplicationService {
 
     if (!project) {
       throw new NotFoundException('Project not found');
+    }
+
+    if (project.ownerId === currentUserId) {
+      throw new BadRequestException('You cannot apply to your own project');
     }
 
     if (project.status !== ProjectStatus.OPEN) {
@@ -47,13 +54,14 @@ export class ProjectApplicationService {
       status: ApplicationStatus.PENDING,
     });
 
-    return await this.dataSource.getRepository(ProjectApplication).save(application);
+    return this.dataSource.getRepository(ProjectApplication).save(application);
   }
 
   async accept(applicationId: string, currentUserId: string) {
-    return await this.dataSource.transaction(async manager => {
+    return this.dataSource.transaction(async manager => {
       const applicationRepo = manager.getRepository(ProjectApplication);
       const projectRepo = manager.getRepository(Project);
+      const taskRepo = manager.getRepository(Task);
 
       const application = await applicationRepo.findOne({
         where: { id: applicationId },
@@ -93,28 +101,30 @@ export class ProjectApplicationService {
         .andWhere('status = :status', { status: ApplicationStatus.PENDING })
         .execute();
 
+      await taskRepo
+        .createQueryBuilder()
+        .update(Task)
+        .set({ status: TaskStatus.TODO })
+        .where('projectId = :projectId', { projectId: application.projectId })
+        .andWhere('status = :status', { status: TaskStatus.DRAFT })
+        .execute();
+
       return application;
     });
   }
 
   async getMyApplications(userId: string) {
-    return await this.dataSource.getRepository(ProjectApplication).find({
+    return this.dataSource.getRepository(ProjectApplication).find({
       where: { freelancerId: userId },
-      relations: {
-        project: true,
-      },
-      order: {
-        createdAt: 'DESC',
-      },
+      relations: { project: true },
+      order: { createdAt: 'DESC' },
     });
   }
 
   async withdraw(applicationId: string, userId: string) {
     const application = await this.dataSource.getRepository(ProjectApplication).findOne({
       where: { id: applicationId },
-      relations: {
-        project: true,
-      },
+      relations: { project: true },
     });
 
     if (!application) {
@@ -136,16 +146,13 @@ export class ProjectApplicationService {
     }
 
     application.status = ApplicationStatus.WITHDRAWN;
-
-    return await this.dataSource.getRepository(ProjectApplication).save(application);
+    return this.dataSource.getRepository(ProjectApplication).save(application);
   }
 
   async reject(applicationId: string, userId: string) {
     const application = await this.dataSource.getRepository(ProjectApplication).findOne({
       where: { id: applicationId },
-      relations: {
-        project: true,
-      },
+      relations: { project: true },
     });
 
     if (!application) {
@@ -169,7 +176,6 @@ export class ProjectApplicationService {
     }
 
     application.status = ApplicationStatus.REJECTED;
-
-    return await this.dataSource.getRepository(ProjectApplication).save(application);
+    return this.dataSource.getRepository(ProjectApplication).save(application);
   }
 }

@@ -28,7 +28,9 @@ export type ProjectApplicationItem = {
   freelancer?: {
     id: string;
     fullName: string;
-    email?: string;
     avatar_url?: string;
+    authUser?: {
+      email: string;
+    };
   };
 };
