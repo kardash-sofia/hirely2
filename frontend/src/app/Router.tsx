@@ -10,6 +10,8 @@ import RegisterPage from '../pages/Auth/RegisterPage';
 import { ProjectDetailsPage } from '../pages/Projects/ProjectDetails/ProjectDetails';
 import { ChatPage } from '../pages/Messages/ChatPage';
 import { ProfilePage } from '../pages/Profile/ProfilePage';
+import { AdminDashboardPage } from '../pages/Admin/AdminDashboardPage';
+import { Role } from '../pages/Auth/types';
 
 export const AppRouter = () => {
   return (
@@ -34,6 +36,15 @@ export const AppRouter = () => {
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                  <AdminDashboardPage />
+                </ProtectedRoute>
+              }
+            />
 
             <Route path="*" element={<div>404 Not Found</div>} />
           </Routes>

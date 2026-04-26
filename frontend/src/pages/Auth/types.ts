@@ -8,4 +8,5 @@ export type User = {
 export enum Role {
   FREELANCER = 'freelancer', 
   CUSTOMER = 'customer',
+  ADMIN = "admin",
 }

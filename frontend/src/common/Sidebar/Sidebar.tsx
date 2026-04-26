@@ -17,10 +17,12 @@ import {
   MessageOutlined,
   PersonOutline,
   LogoutOutlined,
+  AdminPanelSettingsOutlined
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../../pages/Auth/useAuth';
 import { SidebarHeader } from './SidebarHeader';
+import { Role } from '../../pages/Auth/types';
 
 const drawerWidth = 200;
 const collapsedWidth = 60;
@@ -83,6 +85,18 @@ export const Sidebar: React.FC = () => {
     { label: 'Profile', icon: <PersonOutline />, path: '/profile/me' },
   ];
 
+  const visibleMenuItems =
+    user?.role === Role.ADMIN
+      ? [
+          ...menuItems,
+          {
+            label: "Admin",
+            icon: <AdminPanelSettingsOutlined />,
+            path: "/admin/dashboard",
+          },
+        ]
+      : menuItems;
+
   return (
     <SidebarWrapper>
       <Drawer
@@ -114,7 +128,7 @@ export const Sidebar: React.FC = () => {
         <Divider />
 
         <List sx={{ px: 1 }}>
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <ListItemButton
               component={NavLink}
               to={item.path}        

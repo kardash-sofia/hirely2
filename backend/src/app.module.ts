@@ -8,6 +8,7 @@ import { MessageModule } from './models/message/message.module';
 import { ProjectApplicationModule } from './models/project-application/project-application.module';
 import { AiModule } from './models/ai/ai.module';
 import { RecommendationModule } from './models/recommendation/recommendation.module';
+import { AdminModule } from './models/admin/admin.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RecommendationModule } from './models/recommendation/recommendation.mod
     ProjectApplicationModule,
     AiModule,
     RecommendationModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],

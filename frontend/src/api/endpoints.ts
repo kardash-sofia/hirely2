@@ -42,4 +42,8 @@ export const endpoints = {
     freelancersForProject: (projectId: string) =>
       `/recommendations/projects/${projectId}/freelancers`,
   },
+
+  admin: {
+    dashboard: "/admin/dashboard",
+  },
 };
