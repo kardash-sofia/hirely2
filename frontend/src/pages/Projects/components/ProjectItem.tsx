@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -7,8 +7,9 @@ import {
   Divider,
   Typography,
   Box,
-} from '@mui/material';
-import { OwnerInfo } from './OwnerInfo';
+  Chip,
+} from "@mui/material";
+import { OwnerInfo } from "./OwnerInfo";
 
 export type ProjectItemType = {
   id: string;
@@ -36,74 +37,61 @@ export const ProjectItem: React.FC<ProjectItemType> = ({
   status,
   owner,
 }) => {
+  const navigate = useNavigate();
+
   return (
     <Card
-      component={Link}
-      to={`/projects/${id}`}
+      onClick={() => navigate(`/projects/${id}`)}
       sx={{
+        height: "100%",
+        cursor: "pointer",
         borderRadius: 4,
-        boxShadow: 3,
-        transition: 'all 0.2s ease',
-        textDecoration: 'none',
-        '&:hover': {
-          cursor: 'pointer',
-        }
+        overflow: "hidden",
+        transition: "0.25s",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: 6,
+        },
       }}
     >
-      {/* Image */}
       {image && (
-        <CardMedia component="img" height="160" image={image} alt={title} />
+        <CardMedia
+          component="img"
+          height="170"
+          image={image}
+          alt={title}
+        />
       )}
 
       <CardContent>
-        {/* Owner */}
         <OwnerInfo owner={owner} />
 
-        {/* Title */}
-        <Typography
-          variant="subtitle1"
-          gutterBottom
-          fontWeight={600}
-        >
+        <Typography variant="h6" fontWeight={700} mt={2}>
           {title}
         </Typography>
 
-        {/* Description (trimmed) */}
         <Typography
           variant="body2"
           color="text.secondary"
+          mt={1}
           sx={{
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            mb: 1,
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
           }}
         >
-          {description}
+          {description || "No description provided."}
         </Typography>
 
-        <Divider sx={{ my: 1.5 }} />
+        <Divider sx={{ my: 2 }} />
 
-        {/* Bottom */}
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography fontWeight={600}>
-            ${budgetMin} – ${budgetMax}
+          <Typography fontWeight={700}>
+            {budgetMin && budgetMax ? `$${budgetMin} – $${budgetMax}` : "No budget"}
           </Typography>
 
-          <Typography
-            variant="caption"
-            sx={{
-              px: 1.5,
-              py: 0.5,
-              borderRadius: '10px',
-              bgcolor: 'grey.200',
-              fontWeight: 500,
-            }}
-          >
-            {status}
-          </Typography>
+          <Chip label={status} size="small" color="primary" />
         </Box>
       </CardContent>
     </Card>

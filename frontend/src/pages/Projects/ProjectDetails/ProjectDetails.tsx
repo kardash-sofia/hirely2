@@ -43,6 +43,7 @@ import {
 import { ProjectStatus } from "../types";
 import { ApplicationStatus } from "../../../api/services/ProjectApplications/types";
 import { applicationStatusLabelMap, projectStatusColorMap, statusLabelMap } from "./constants";
+import { UserPreviewLink } from "../../../common/UserPreviewLink/UserPreviewLink";
 
 export const ProjectDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -330,31 +331,25 @@ export const ProjectDetailsPage = () => {
         </Paper>
 
         <Paper sx={{ p: 4, borderRadius: 4 }}>
-          <Typography variant="h6" gutterBottom>
-            Owner
-          </Typography>
+         <Typography variant="h6" fontWeight={700}>
+          Owner
+        </Typography>
 
-          {data.owner ? (
-            <OwnerInfo
-              owner={data.owner}
-            />
-          ) : (
-            <Typography color="text.secondary">
-              No owner information
+        {data.owner ? (
+          <UserPreviewLink user={data.owner} />
+        ) : (
+          <Typography color="text.secondary">No owner information</Typography>
+        )}
+
+        {data.executor && (
+          <>
+            <Typography variant="h6" fontWeight={700} mt={3}>
+              Executor
             </Typography>
-          )}
 
-          {data.executor && (
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Executor
-              </Typography>
-              <Typography>{data.executor.fullName}</Typography>
-              <Typography color="text.secondary">
-                {data.executor.email}
-              </Typography>
-            </Box>
-          )}
+            <UserPreviewLink user={data.executor} />
+          </>
+        )}
         </Paper>
 
         {isOwner && (
