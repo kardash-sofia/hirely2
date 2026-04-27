@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import {
   CartesianGrid,
   Line,
@@ -11,6 +11,7 @@ import {
 
 import type { MonthlyChartItem } from "../types";
 import { ChartCard } from "./ChartCard";
+import { EmptyChart } from "./EmptyChart";
 
 type Props = {
   title: string;
@@ -52,9 +53,3 @@ export const AdminLineChart = ({ title, subtitle, data, lineName }: Props) => {
     </ChartCard>
   );
 };
-
-const EmptyChart = () => (
-  <Typography color="text.secondary" py={8} textAlign="center">
-    No data yet
-  </Typography>
-);

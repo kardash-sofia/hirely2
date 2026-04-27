@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import {
   Cell,
   Pie,
@@ -10,7 +10,7 @@ import {
 
 import type { ChartItem } from "../types";
 import { ChartCard } from "./ChartCard";
-import { formatLabel } from "../utils";
+import { EmptyChart } from "./EmptyChart";
 
 type Props = {
   title: string;
@@ -36,7 +36,6 @@ export const AdminPieChart = ({ title, subtitle, data }: Props) => {
                 outerRadius={95}
                 innerRadius={55}
                 paddingAngle={3}
-                //label={({ label, value }) => `${formatLabel(label)}: ${value}`}
                 label={({ label, value }) => `${label}: ${value}`}
               >
                 {data.map((item, index) => (
@@ -49,7 +48,6 @@ export const AdminPieChart = ({ title, subtitle, data }: Props) => {
 
               <Tooltip/>
 
-              {/* <Legend formatter={(value) => formatLabel(String(value))} /> */}
               <Legend formatter={(value) => (String(value))} />
             </PieChart>
           </ResponsiveContainer>
@@ -58,9 +56,3 @@ export const AdminPieChart = ({ title, subtitle, data }: Props) => {
     </ChartCard>
   );
 };
-
-const EmptyChart = () => (
-  <Typography color="text.secondary" py={8} textAlign="center">
-    No data yet
-  </Typography>
-);

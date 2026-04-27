@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import {
   Bar,
   BarChart,
@@ -11,6 +11,7 @@ import {
 
 import type { ChartItem } from "../types";
 import { ChartCard } from "./ChartCard";
+import { EmptyChart } from "./EmptyChart";
 
 type Props = {
   title: string;
@@ -21,7 +22,6 @@ type Props = {
 export const AdminBarChart = ({ title, subtitle, data }: Props) => {
   const formattedData = data.map((item) => ({
     ...item,
-    //label: formatLabel(item.label),
     label: item.label,
   }));
 
@@ -61,9 +61,3 @@ export const AdminBarChart = ({ title, subtitle, data }: Props) => {
     </ChartCard>
   );
 };
-
-const EmptyChart = () => (
-  <Typography color="text.secondary" py={8} textAlign="center">
-    No data yet
-  </Typography>
-);
