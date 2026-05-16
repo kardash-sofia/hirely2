@@ -14,7 +14,7 @@ export const ChatWindow = ({ chatId, chats }: { chatId: string; chats: Chat[] })
   const chat = chats.find((c) => c.id === chatId);
 
   return (
-    <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       <ChatHeader chatName={chat?.title || "Chat"} />
 
       <MessagesList messages={messages} />

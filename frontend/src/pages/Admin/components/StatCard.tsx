@@ -12,7 +12,7 @@ export const StatCard = ({ title, value, icon, subtitle }: StatCardProps) => {
   return (
     <Card
       sx={{
-        height: "100%",
+        height: "150px",
         borderRadius: 4,
         background:
           "linear-gradient(135deg, rgba(178,117,255,0.12), rgba(117,165,255,0.08))",

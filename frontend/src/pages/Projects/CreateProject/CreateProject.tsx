@@ -845,7 +845,16 @@ export const CreateProject = () => {
                 color="primary"
                 onClick={handleCreateProject}
                 disabled={isCreatingProject || isAiBusy}
-                sx={{ borderRadius: 3, py: 1.4 }}
+                sx={{
+                  position: "fixed",
+                  right: 32,
+                  bottom: 32,
+                  zIndex: 1200,
+                  borderRadius: "999px",
+                  px: 4,
+                  py: 1.4,
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.18)",
+                }}
               >
                 {isCreatingProject ? "Creating..." : "Create project"}
               </Button>
