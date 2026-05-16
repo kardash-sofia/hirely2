@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
-import { useAuth } from "../pages/Auth/useAuth";
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../app/context/AuthContext";
 import { useSnackbar } from "./Snackbar/useSnackbar";
 import { SnackbarType } from "./Snackbar/types";
 

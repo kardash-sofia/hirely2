@@ -4,7 +4,7 @@ import { Box, Button, TextField, Typography, Paper, RadioGroup, FormControlLabel
 
 import { useSnackbar } from '../../common/Snackbar/useSnackbar';
 import { SnackbarType } from '../../common/Snackbar/types';
-import { useAuth } from './useAuth';
+import { useAuth } from '../../app/context/AuthContext';
 import { Role } from './types';
 
 export default function RegisterPage() {

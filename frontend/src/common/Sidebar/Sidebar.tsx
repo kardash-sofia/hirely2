@@ -20,7 +20,7 @@ import {
   AdminPanelSettingsOutlined
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import { useAuth } from '../../pages/Auth/useAuth';
+import { useAuth } from '../../app/context/AuthContext';
 import { SidebarHeader } from './SidebarHeader';
 import { Role } from '../../pages/Auth/types';
 

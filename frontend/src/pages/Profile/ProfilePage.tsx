@@ -9,7 +9,7 @@ import { useGetProfile } from "./hooks/useGetUser";
 import { Loader } from "../../common/Loader";
 import { Role } from "../Auth/types";
 import { ProjectsTab } from "./components/tabs/ProjectsTab";
-import { useAuth } from "../Auth/useAuth";
+import { useAuth } from "../../app/context/AuthContext";
 import { ApplicationsTab } from "./components/tabs/ApplicationsTab";
 
 export const ProfilePage = () => {

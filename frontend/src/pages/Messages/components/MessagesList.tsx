@@ -1,7 +1,6 @@
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useRef } from "react";
-
-import { useAuth } from "../../Auth/useAuth";
+import { useAuth } from "../../../app/context/AuthContext";
 import type { Message } from "../types";
 
 export const MessagesList = ({ messages }: { messages: Message[] }) => {

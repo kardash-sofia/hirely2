@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useSnackbar } from '../../common/Snackbar/useSnackbar';
 import { SnackbarType } from '../../common/Snackbar/types';
-import { useAuth } from './useAuth';
+import { useAuth } from '../../app/context/AuthContext';
 
 export default function LoginPage() {
   const { login } = useAuth();

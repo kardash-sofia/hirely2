@@ -11,7 +11,7 @@ import { BasicList } from "../../common/BasicList";
 import { useGetProjects } from "./hooks/useGetProjects";
 import { ProjectItem } from "./components/ProjectItem";
 import DUMMY_IMAGE from '../../assets/img.jpg';
-import { useAuth } from "../Auth/useAuth";
+import { useAuth } from "../../app/context/AuthContext";
 import { Role } from "../Auth/types";
 import { useGetConstants } from "./hooks/useGetConstants";
 import { ProjectFilters } from "./components/ProjectFilters";
