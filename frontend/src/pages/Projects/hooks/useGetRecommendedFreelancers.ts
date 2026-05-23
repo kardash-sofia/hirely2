@@ -3,11 +3,12 @@ import { getRecommendedFreelancersForProject } from "../../../api/services/Recom
 
 export const useGetRecommendedFreelancers = (
   projectId: string,
-  limit = 6
+  limit = 6,
+  options?: { enabled?: boolean },
 ) => {
   return useQuery({
     queryKey: ["recommendations", "project-freelancers", projectId, limit],
     queryFn: () => getRecommendedFreelancersForProject(projectId, limit),
-    enabled: !!projectId,
+    enabled: options?.enabled && !!projectId,
   });
 };

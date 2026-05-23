@@ -400,7 +400,13 @@ export const CreateProject = () => {
 
   return (
     <Box sx={{ px: { xs: 2, md: 4 }, py: 4 }}>
-      <Stack spacing={1} mb={4}>
+     <Stack
+      direction="row"
+      justifyContent="space-between"
+      alignItems="flex-start"
+      mb={4}
+    >
+      <Stack spacing={1}>
         <Typography variant="h4" fontWeight={800}>
           Create Project
         </Typography>
@@ -408,6 +414,22 @@ export const CreateProject = () => {
           Fill in the project details and optionally use AI to improve the draft.
         </Typography>
       </Stack>
+
+      <Button
+        variant="contained"
+        onClick={handleCreateProject}
+        disabled={isCreatingProject || isAiBusy}
+        sx={{
+          borderRadius: "999px",
+          px: 4,
+          py: 1.4,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {isCreatingProject ? "Creating..." : "Create project"}
+      </Button>
+    </Stack>
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
@@ -564,7 +586,7 @@ export const CreateProject = () => {
                 </Box>
               </Stack>
             </Paper>
-
+{/* 
             <Paper
               elevation={0}
               sx={{
@@ -645,7 +667,7 @@ export const CreateProject = () => {
                   ))}
                 </Stack>
               )}
-            </Paper>
+            </Paper> */}
           </Stack>
         </Grid>
 
@@ -659,9 +681,20 @@ export const CreateProject = () => {
               borderColor: "divider",
               position: "sticky",
               top: 24,
+              height: "calc(100vh - 158px)",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            <Stack spacing={2.5}>
+            <Stack
+              spacing={2.5}
+              sx={{
+                flex: 1,
+                overflowY: "auto",
+                pr: 1,
+                scrollbarGutter: "stable",
+              }}
+            >
               <Stack direction="row" spacing={1} alignItems="center">
                 <AutoAwesomeRoundedIcon color="primary" />
                 <Typography variant="h6" fontWeight={800}>
@@ -837,27 +870,6 @@ export const CreateProject = () => {
                   </Card>
                 )}
               </Stack>
-
-              <Divider />
-
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleCreateProject}
-                disabled={isCreatingProject || isAiBusy}
-                sx={{
-                  position: "fixed",
-                  right: 32,
-                  bottom: 32,
-                  zIndex: 1200,
-                  borderRadius: "999px",
-                  px: 4,
-                  py: 1.4,
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.18)",
-                }}
-              >
-                {isCreatingProject ? "Creating..." : "Create project"}
-              </Button>
             </Stack>
           </Paper>
         </Grid>

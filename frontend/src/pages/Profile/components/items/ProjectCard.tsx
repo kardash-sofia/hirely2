@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { Box, Card, Chip, Stack, Typography } from "@mui/material"
 import type { ProjectItemType } from "../../../Projects/components/ProjectItem";
+import DUMMY_IMAGE from '../../../../assets/img.jpg';
+
 export const ProjectCard = ({ item }: { item: ProjectItemType }) => {
   return (
     <Card
@@ -28,7 +30,7 @@ export const ProjectCard = ({ item }: { item: ProjectItemType }) => {
             borderRadius: 2,
             background: "#EDE9FF",
             mb: 1.5,
-            backgroundImage: item.image ? `url(${item.image})` : undefined,
+            backgroundImage: item.image ? `url(${item.image})` : `url(${DUMMY_IMAGE})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
         }}

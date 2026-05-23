@@ -43,6 +43,8 @@ import { ProjectStatus } from "../types";
 import { ApplicationStatus } from "../../../api/services/ProjectApplications/types";
 import { applicationStatusLabelMap, projectStatusColorMap, statusLabelMap } from "./constants";
 import { UserPreviewLink } from "../../../common/UserPreviewLink/UserPreviewLink";
+import PersonSearchRoundedIcon from "@mui/icons-material/PersonSearchRounded";
+import { RecommendedFreelancersDrawer } from "../components/RecommendedFreelancersDrawer";
 
 export const ProjectDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,6 +54,7 @@ export const ProjectDetailsPage = () => {
   const { showSnackbar } = useSnackbar();
 
   const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const [isRecommendationsOpen, setIsRecommendationsOpen] = useState(false);
 
   const { data, isLoading } = useGetProjectDetails(projectId);
 
@@ -135,7 +138,11 @@ export const ProjectDetailsPage = () => {
                   {data.title}
                 </Typography>
 
-                <Stack direction="row" spacing={1} flexWrap="wrap">
+                <Stack
+                  direction="row"
+                  flexWrap="wrap"
+                  gap={1}
+                >
                   <Chip
                     label={statusLabelMap[data.status]}
                     color={projectStatusColorMap[data.status]}
@@ -150,7 +157,11 @@ export const ProjectDetailsPage = () => {
                 </Stack>
               </Box>
 
-              <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Stack
+                direction="row"
+                flexWrap="wrap"
+                gap={1}
+              >
                 {canApply && (
                   <Button
                     variant="contained"
@@ -245,6 +256,16 @@ export const ProjectDetailsPage = () => {
                       }
                     >
                       Cancel project
+                    </Button>
+                  )}
+
+                  {isOwner && (
+                    <Button
+                      variant="contained"
+                      startIcon={<PersonSearchRoundedIcon />}
+                      onClick={() => setIsRecommendationsOpen(true)}
+                    >
+                      Find freelancers
                     </Button>
                   )}
               </Stack>
@@ -464,6 +485,14 @@ export const ProjectDetailsPage = () => {
               </List>
             )}
           </Paper>
+        )}
+
+        {isOwner && (
+          <RecommendedFreelancersDrawer
+            open={isRecommendationsOpen}
+            onClose={() => setIsRecommendationsOpen(false)}
+            projectId={projectId}
+          />
         )}
 
         <ApplyToProjectModal
