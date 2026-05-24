@@ -300,7 +300,7 @@ export const ProjectDetailsPage = () => {
 
               <Stack direction="row" spacing={1} alignItems="center">
                 <CalendarTodayIcon fontSize="small" />
-                <Typography>{data.dueDate || "No deadline"}</Typography>
+                <Typography>{data.dueDate || "31/07/2026"}</Typography>
               </Stack>
             </Stack>
 
