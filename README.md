@@ -1,321 +1,199 @@
+# Hirely
 
-  HIRELY — ІНСТРУКЦІЯ КОРИСТУВАЧА
-  Вебплатформа для пошуку та замовлення фріланс-послуг із ШІ-функціями
+AI-assisted freelance marketplace platform for project management, freelancer matching, and realtime communication.
 
-ЗМІСТ
------
-  1. Опис системи
-  2. Вимоги для встановлення
-  3. Встановлення та налаштування
-     3.1. База даних (PostgreSQL у Docker)
-     3.2. Серверна частина (Backend)
-     3.3. Клієнтська частина (Frontend)
-     3.4. ML-сервіс
-  4. Функціонал платформи
-     4.1. Реєстрація та вхід
-     4.2. Перегляд і пошук проєктів
-     4.3. Створення проєкту (для замовників)
-     4.4. Подача заявки (для фрілансерів)
-     4.5. Управління заявками та вибір виконавця
-     4.6. Realtime-чат
-  5. Вирішення типових проблем
+---
 
+## Tech Stack
 
-1. ОПИС СИСТЕМИ
+### Frontend
+- React
+- TypeScript
+- Vite
+- Material UI
+- React Query
+- Socket.IO Client
 
-Hirely — повноцінна вебплатформа для пошуку та замовлення
-фріланс-послуг зі вбудованим штучним інтелектом.
+### Backend
+- NestJS
+- TypeScript
+- TypeORM
+- PostgreSQL
+- JWT Authentication
+- Socket.IO
 
-Архітектура — трирівнева клієнт-серверна, три окремих сервіси:
+### ML Service
+- Python
+- FastAPI
+- OpenAI API
+- joblib
 
-  [Frontend]    React + TypeScript + Vite
-                Інтерфейс користувача (SPA).
-                Використовує Material UI, Axios, TanStack React Query,
-                React Router DOM, Socket.IO Client.
+---
 
-  [Backend]     NestJS + TypeScript + TypeORM
-                REST API, бізнес-логіка, JWT-авторизація,
-                управління проєктами, заявками та чатом (Socket.IO).
+## Project Structure
 
-  [ML-service]  Python + FastAPI
-                ШІ-функції: прогноз бюджету, визначення категорії,
-                генерація опису проєкту через OpenAI API.
+```bash
+frontend/     # React frontend
+backend/      # NestJS backend
+ml-service/   # AI/ML microservice
+```
 
-  [База даних]  PostgreSQL 16 у Docker-контейнері.
-                Усі первинні ключі — UUID.
-                Схема змінюється через TypeORM-міграції.
+---
 
-Структура директорій:
+## Requirements
 
-  frontend/     — клієнтська частина
-  backend/      — серверна частина
-  ml-service/   — ШІ-сервіс
+Before running the project, install:
 
+- Docker Desktop
+- Node.js 18+
+- Python 3.10+
 
-2. ВИМОГИ ДЛЯ ВСТАНОВЛЕННЯ
+---
 
-Перед першим запуском встановіть:
+## Environment Variables
 
-  - Docker Desktop  https://www.docker.com/products/docker-desktop/
-                    (переконайтесь, що служба Docker запущена)
+### Backend (`backend/.env`)
 
-  - Node.js 18 LTS+ https://nodejs.org/
-                    (разом встановлюється npm)
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5444/hirely
+JWT_SECRET=your_secret
+CLIENT_URL=http://localhost:5173
+AI_SERVICE_URL=http://localhost:8000
+PORT=3000
+```
 
-  - Python 3.10+    https://www.python.org/downloads/
-                    Перевірка версії: python --version
+### Frontend (`frontend/.env`)
 
-Вихідний код: клонуйте репозиторій (гілка dev) або розпакуйте
-архів із кодом у зручну директорію.
+```env
+VITE_API_URL=http://localhost:3000
+```
 
+### ML Service (`ml-service/.env`)
 
-3. ВСТАНОВЛЕННЯ ТА НАЛАШТУВАННЯ
+```env
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_MODEL=gpt-4o-mini
+```
 
-----------------------------------------------------------------
-3.1. БАЗА ДАНИХ (PostgreSQL у Docker)
-----------------------------------------------------------------
+---
 
-Параметри підключення за замовчуванням:
+## Running PostgreSQL
 
-  Ім'я БД:   hirely
-  Користувач: postgres
-  Пароль:     postgres
-  Порт:       5444 (локальний хост) / 5432 (у контейнері)
+From the project root:
 
-Запуск контейнера з кореневої директорії проєкту:
+```bash
+docker-compose up -d
+```
 
-  docker-compose up -d
+Verify container status:
 
-Перевірка, що контейнер "hirely-db" запущено:
+```bash
+docker ps
+```
 
-  docker ps
+---
 
-----------------------------------------------------------------
-3.2. СЕРВЕРНА ЧАСТИНА (Backend)
-----------------------------------------------------------------
+## Running Backend
 
-Перейдіть до директорії backend/ та встановіть залежності:
+```bash
+cd backend
+npm install
+npm run migration:run
+npm run start:dev
+```
 
-  cd backend
-  npm install
+Backend runs on:
 
-Створіть файл backend/.env із наступними змінними:
+```txt
+http://localhost:3000
+```
 
-  DATABASE_URL   — рядок підключення до PostgreSQL
-                   Приклад: postgresql://postgres:postgres@localhost:5444/hirely
+---
 
-  JWT_SECRET     — секрет для підпису JWT access-токену
+## Running Frontend
 
-  CLIENT_URL     — адреса frontend для налаштування CORS
-                   Приклад: http://localhost:5173
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-  AI_SERVICE_URL — адреса ML-сервісу
-                   За замовчуванням: http://localhost:8000
+Frontend runs on:
 
-  PORT           — порт backend-сервера
-                   За замовчуванням: 3000
+```txt
+http://localhost:5173
+```
 
-Виконайте міграції бази даних:
+---
 
-  npm run migration:run
+## Running ML Service
 
-Запуск backend у режимі розробки:
+```bash
+cd ml-service
 
-  npm run start:dev
+python -m venv venv
+```
 
-----------------------------------------------------------------
-3.3. КЛІЄНТСЬКА ЧАСТИНА (Frontend)
-----------------------------------------------------------------
+### Windows
 
-Перейдіть до директорії frontend/ та встановіть залежності:
+```bash
+venv\Scripts\activate
+```
 
-  cd frontend
-  npm install
+### Linux / macOS
 
-Створіть файл frontend/.env із змінною:
+```bash
+source venv/bin/activate
+```
 
-  VITE_API_URL  — адреса backend API
-                  Приклад: http://localhost:3000
+Install dependencies:
 
-Запуск frontend у режимі розробки:
+```bash
+pip install -r requirements.txt
+```
 
-  npm run dev
+Run service:
 
-Застосунок буде доступний у браузері за адресою:
-  http://localhost:5173
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
 
-----------------------------------------------------------------
-3.4. ML-СЕРВІС
-----------------------------------------------------------------
+---
 
-Перейдіть до директорії ml-service/ та створіть віртуальне
-середовище Python:
+## Main Features
 
-  cd ml-service
-  python -m venv venv
+- User authentication with JWT
+- Project creation and management
+- Freelancer applications
+- AI-assisted project generation
+- Project category prediction
+- Budget prediction
+- Realtime chat with Socket.IO
+- Role-based access control
+- Freelancer recommendation system
 
-Активуйте середовище:
+---
 
-  Windows:        venv\Scripts\activate
-  Linux / macOS:  source venv/bin/activate
+## Troubleshooting
 
-Встановіть залежності:
+### PostgreSQL container is not running
 
-  pip install -r requirements.txt
+Check Docker Desktop and verify that port `5444` is available.
 
-Створіть файл ml-service/.env із змінними:
+### Backend cannot connect to database
 
-  OPENAI_API_KEY — ключ OpenAI API (обов'язково; без нього
-                   функція генерації опису буде недоступна)
+Verify `DATABASE_URL` in `backend/.env`.
 
-  OPENAI_MODEL   — назва моделі OpenAI
-                   Приклад: gpt-4o-mini
+### OpenAI API key error
 
-Переконайтеся, що навчені моделі присутні в директорії
-ml-service/artifacts/:
+Ensure `OPENAI_API_KEY` is specified in `ml-service/.env`.
 
-  budget_model.joblib    — модель прогнозу бюджету
-  category_model.joblib  — модель визначення категорії
+### Frontend cannot connect to backend
 
-Запуск ML-сервісу:
+Verify `VITE_API_URL`.
 
-  uvicorn main:app --host 0.0.0.0 --port 8000
+---
 
+## License
 
-4. ФУНКЦІОНАЛ ПЛАТФОРМИ
-
-----------------------------------------------------------------
-4.1. РЕЄСТРАЦІЯ ТА ВХІД
-----------------------------------------------------------------
-
-1. Відкрийте застосунок у браузері (http://localhost:5173).
-2. Натисніть кнопку «Log in».
-3. Заповніть форму:
-     - Повне ім'я
-     - Email-адреса
-     - Пароль
-     - Роль: «Customer» (замовник) або «Freelancer» (фрілансер)
-4. Для повторного входу введіть email і пароль.
-
-Після входу система зберігає access-токен і refresh-токен у
-локальному сховищі браузера. Усі запити до API надалі
-виконуються автоматично з токеном авторизації.
-
-----------------------------------------------------------------
-4.2. ПЕРЕГЛЯД І ПОШУК ПРОЄКТІВ
-----------------------------------------------------------------
-
-На головній сторінці та у розділі «Projects» відображається
-каталог відкритих проєктів. Доступні:
-
-  - Фільтрація за категорією, технологіями та статусом
-  - Сортування за різними полями
-  - Пагінація результатів
-
-Натисніть на будь-який проєкт для перегляду детального опису,
-задач, вимог до виконавця та списку поданих заявок.
-
-----------------------------------------------------------------
-4.3. СТВОРЕННЯ ПРОЄКТУ (для замовників)
-----------------------------------------------------------------
-
-1. Натисніть «Create project».
-2. Заповніть форму:
-     - Назва проєкту
-     - Опис
-     - Мінімальний і максимальний бюджет
-     - Дедлайн
-     - Категорії та технології
-3. За потреби скористайтеся ШІ-помічником:
-     а) Введіть базову інформацію про проєкт у поля назви й опису.
-     б) Натисніть «Згенерувати опис» або «ШІ-асистент».
-     в) ML-сервіс автоматично:
-          - визначить категорію проєкту
-          - спрогнозує рекомендований бюджет
-          - сформує розширений опис із вимогами, очікуваними
-            результатами та рекомендованими навичками
-     г) Перегляньте та відредагуйте отримані дані за потреби.
-4. Збережіть проєкт.
-
-Проєкт створюється атомарно разом із пов'язаними категоріями
-та технологіями.
-
-----------------------------------------------------------------
-4.4. ПОДАЧА ЗАЯВКИ (для фрілансерів)
-----------------------------------------------------------------
-
-1. Відкрийте сторінку проєкту зі статусом «Open».
-2. Натисніть «Apply to project».
-3. Напишіть супровідний лист — коротке пояснення, чому ви
-   підходите для цього проєкту.
-4. Надішліть заявку.
-
-Система перевіряє:
-  - що фрілансер не є власником проєкту
-  - що фрілансер не подавав заявку на цей проєкт раніше
-
-Подана заявка отримує статус «Pending».
-
-----------------------------------------------------------------
-4.5. УПРАВЛІННЯ ЗАЯВКАМИ ТА ВИБІР ВИКОНАВЦЯ (для замовників)
-----------------------------------------------------------------
-
-У розділі деталей проєкту замовник бачить усі заявки з
-профілем претендента, його рейтингом і супровідним листом.
-
-Прийняття заявки:
-  1. Оберіть заявку та натисніть «Accept».
-  2. Система автоматично:
-       - призначить виконавця для проєкту
-       - переведе проєкт у статус «В роботі»
-       - переведе задачі у статус «До виконання»
-       - встановить статус «Відхилено» для решти заявок
-
-Замовник також може відхилити окрему заявку без закриття
-інших, якщо проєкт ще відкритий.
-
-----------------------------------------------------------------
-4.6. REALTIME-ЧАТ
-----------------------------------------------------------------
-
-1. Перейдіть до розділу «Повідомлення».
-2. Оберіть або розпочніть переписку з іншим користувачем.
-
-Чат реалізований на WebSocket (Socket.IO):
-  - При відкритті чату завантажується повна історія повідомлень.
-  - Нові повідомлення надходять у реальному часі без
-    перезавантаження сторінки.
-  - Ідентифікація у WebSocket-з'єднанні відбувається через
-    JWT-токен.
-
-
-5. ВИРІШЕННЯ ТИПОВИХ ПРОБЛЕМ
-
-ПРОБЛЕМА: Контейнер "hirely-db" не запускається
-  → Переконайтесь, що Docker Desktop запущено.
-  → Перевірте, чи порт 5444 не зайнятий іншим процесом.
-
-ПРОБЛЕМА: Backend не підключається до бази даних
-  → Перевірте значення DATABASE_URL у backend/.env
-  → Переконайтесь, що контейнер "hirely-db" запущений:
-     docker ps
-
-ПРОБЛЕМА: Помилка "Unauthorized" при запитах до API
-  → Спробуйте вийти та увійти знову (access-токен міг
-    прострочитися).
-  → Якщо помилка повторюється — перевірте JWT_SECRET
-    у backend/.env
-
-ПРОБЛЕМА: ML-сервіс повертає "RuntimeError: OpenAI API key
-          is not configured"
-  → Вкажіть OPENAI_API_KEY у ml-service/.env
-  → Перезапустіть ML-сервіс.
-
-ПРОБЛЕМА: ШІ-функції недоступні або повертають "Bad Gateway"
-  → Переконайтесь, що ML-сервіс запущений на порту 8000.
-  → Перевірте значення AI_SERVICE_URL у backend/.env
-
-ПРОБЛЕМА: Сторінки застосунку не відкриваються у браузері
-  → Перевірте, що frontend запущений (npm run dev у frontend/).
-  → Переконайтесь, що VITE_API_URL вказує на правильну
-    адресу backend.
+This project was developed as a diploma thesis project.
