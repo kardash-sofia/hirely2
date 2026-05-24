@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Stack, Divider } from "@mui/material";
+import { Box, Typography, Paper, Stack, Divider, Chip } from "@mui/material";
 import type { User } from "../../../../api/services/Profile/types";
 
 type Props = {
@@ -18,6 +18,46 @@ export const OverviewTab = ({ user }: Props) => {
         <Typography color="text.secondary">
           {profile?.bio || "No bio provided."}
         </Typography>
+      </Paper>
+
+      <Paper sx={{ p: 2, borderRadius: 3 }}>
+        <Typography fontWeight={600} sx={{ mb: 2 }}>
+          Technologies
+        </Typography>
+
+        <Stack direction="row" spacing={1} flexWrap="wrap">
+          {profile?.technologies?.map((tech) => (
+            <Chip
+              key={tech.id}
+              label={tech.name}
+              sx={{
+                background: "#F3F0FF",
+                color: "#46307B",
+                fontWeight: 500,
+              }}
+            />
+          ))}
+        </Stack>
+      </Paper>
+
+      <Paper sx={{ p: 2, borderRadius: 3 }}>
+        <Typography fontWeight={600} sx={{ mb: 2 }}>
+          Skills
+        </Typography>
+
+        <Stack direction="row" spacing={1} flexWrap="wrap">
+          {profile?.skills?.map((skill) => (
+            <Chip
+              key={skill.id}
+              label={skill.name}
+              sx={{
+                background: "#F3F0FF",
+                color: "#46307B",
+                fontWeight: 500,
+              }}
+            />
+          ))}
+        </Stack>
       </Paper>
 
       <Paper sx={{ p: 2, borderRadius: 3 }}>

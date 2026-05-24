@@ -24,7 +24,14 @@ export class UserService {
   async getById(id: string) {
     const user = await User.findOne({
       where: { id },
-      relations: ['ownedProjects', 'executedProjects', 'profile'],
+      relations: [
+        'ownedProjects',
+        'executedProjects',
+        'profile',
+        'profile.skills',
+        'profile.categories',
+        'profile.technologies',
+      ],
     });
     if (!user) {
       throw new Error('User not found');

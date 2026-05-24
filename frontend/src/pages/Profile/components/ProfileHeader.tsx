@@ -2,8 +2,6 @@ import {
   Box,
   Avatar,
   Typography,
-  Chip,
-  Stack,
   IconButton,
   Button,
 } from "@mui/material";
@@ -14,12 +12,14 @@ import type { User } from "../../../api/services/Profile/types";
 
 type Props = {
   user: User;
-  isEditing: boolean;
-  isMe: boolean;
+  canEdit: boolean;
+  onEdit: () => void;
   onMessage?: () => void;
+  isMe: boolean;
 };
 
-export const ProfileHeader = ({ user, isEditing, isMe, onMessage }: Props) => {
+
+export const ProfileHeader = ({ user, canEdit, onEdit, onMessage, isMe }: Props) => {
   return (
     <Box
       sx={{
@@ -33,7 +33,7 @@ export const ProfileHeader = ({ user, isEditing, isMe, onMessage }: Props) => {
         gap: 3,
       }}
     >
-      {isEditing && (
+      {canEdit && (
         <IconButton
           sx={{
             position: "absolute",
@@ -45,6 +45,7 @@ export const ProfileHeader = ({ user, isEditing, isMe, onMessage }: Props) => {
               background: "rgba(255,255,255,0.2)",
             },
           }}
+          onClick={onEdit}
         >
           <EditIcon />
         </IconButton>
@@ -60,16 +61,6 @@ export const ProfileHeader = ({ user, isEditing, isMe, onMessage }: Props) => {
         <Typography variant="body1" fontWeight={100} sx={{ opacity: 0.8 }}>
           {user?.email || ""}
         </Typography>
-
-        <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
-          {user?.profile?.skills?.map((skill) => (
-            <Chip
-              key={skill}
-              label={skill}
-              sx={{ background: "#fff", color: "#000" }}
-            />
-          ))}
-        </Stack>
       </Box>
 
       <Box sx={{ textAlign: "right", display: "flex", flexDirection: "column", gap: 1 }}>

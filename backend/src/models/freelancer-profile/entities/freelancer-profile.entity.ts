@@ -3,6 +3,7 @@ import { BaseEntity } from '../../../common/base/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { Category } from '../../category/entities/category.entity';
 import { Skill } from '../../skill/entities/skill.entity';
+import { Technology } from '../../technology/entities/technology.entity';
 
 @Entity('freelancer_profiles')
 export class FreelancerProfile extends BaseEntity {
@@ -39,4 +40,10 @@ export class FreelancerProfile extends BaseEntity {
     name: 'freelancer_profile_categories',
   })
   categories: Category[];
+
+  @ManyToMany(() => Technology)
+  @JoinTable({
+    name: 'freelancer_profile_technologies',
+  })
+  technologies: Technology[];
 }

@@ -22,6 +22,8 @@ export const endpoints = {
   profile: {
     userById: (id: string) => `/users/${id}`,
     getMe: () => `/users/profile/me`,
+    getPlaceholders: () => `freelancerProfile/placeholders`,
+    update: (profileId: string) => `/freelancerProfile/${profileId}`,
   },
 
   projectApplications: {

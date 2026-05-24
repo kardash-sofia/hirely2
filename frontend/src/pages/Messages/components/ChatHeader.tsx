@@ -15,10 +15,6 @@ export const ChatHeader = ({ chatName }: { chatName: string }) => {
 
       <Box>
         <Typography fontWeight={600}>{chatName}</Typography>
-
-        <Typography variant="body2" color="text.secondary">
-          online
-        </Typography>
       </Box>
     </Box>
   );

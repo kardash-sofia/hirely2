@@ -4,13 +4,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { OverviewTab } from "./components/tabs/OverviewTab";
 import { PortfolioTab } from "./components/tabs/PortfolioTab";
-import { SkillsTab } from "./components/tabs/SkillsTab";
 import { useGetProfile } from "./hooks/useGetUser";
 import { Loader } from "../../common/Loader";
 import { Role } from "../Auth/types";
 import { ProjectsTab } from "./components/tabs/ProjectsTab";
 import { useAuth } from "../../app/context/AuthContext";
 import { ApplicationsTab } from "./components/tabs/ApplicationsTab";
+import { ProfileEditDrawer } from "./components/ProfileEditDrawer";
+import type { NamedEntity } from "../../api/types";
 
 export const ProfilePage = () => {
   const [tab, setTab] = useState(0);
@@ -19,7 +20,9 @@ export const ProfilePage = () => {
   const navigate = useNavigate();
 
   const { user: me } = useAuth();
-  const { data, isLoading } = useGetProfile(id ?? "");
+  const { data, isLoading, refetch } = useGetProfile(id ?? "");
+
+  const [openEdit, setOpenEdit] = useState(false);
 
   const isMe = id === "me";
   const isFreelancer = data?.role === Role.FREELANCER;
@@ -42,13 +45,15 @@ export const ProfilePage = () => {
   }
 
   return (
+    <>
     <Box sx={{ background: "#f7f7fb", minHeight: "100vh", py: 4 }}>
       <Container maxWidth="md">
         <ProfileHeader
           user={data}
-          isEditing={isMe}
+          canEdit={isMe && isFreelancer}
           isMe={isMe}
           onMessage={handleMessage}
+          onEdit={() => setOpenEdit(true)}
         />
 
         <Box sx={{ mt: 3, background: "#fff", borderRadius: 3, p: 2 }}>
@@ -56,7 +61,6 @@ export const ProfilePage = () => {
             <Tab label="Projects" />
             {isFreelancer && <Tab label="Overview" />}
             {isFreelancer && <Tab label="Applications" />}
-            {isFreelancer && <Tab label="Skills" />}
             {isFreelancer && <Tab label="Portfolio" />}
           </Tabs>
 
@@ -68,11 +72,28 @@ export const ProfilePage = () => {
             )}
             {tab === 1 && isFreelancer && <OverviewTab user={data} />}
             {tab === 2 && isFreelancer && <ApplicationsTab />}
-            {tab === 3 && isFreelancer && <SkillsTab />}
-            {tab === 4 && isFreelancer && <PortfolioTab />}
+            {tab === 3 && isFreelancer && <PortfolioTab />}
           </Box>
         </Box>
       </Container>
     </Box>
+    <ProfileEditDrawer
+      open={openEdit}
+      onClose={() => setOpenEdit(false)}
+      defaultValues={{
+        bio: data.profile?.bio ?? "",
+        location: data.profile?.location ?? "",
+        hourlyRate: data.profile?.hourlyRate ?? "",
+        experienceLevel: data.profile?.experienceLevel ?? "",
+        skillIds: data.profile?.skills?.map((s: NamedEntity) => s.id) ?? [],
+        technologyIds: data.profile?.technologies?.map((t: NamedEntity) => t.id) ?? [],
+        categoryIds: data.profile?.categories?.map((c: NamedEntity) => c.id) ?? [],
+      }}
+      onSuccess={() => {
+        refetch();
+      }}
+      profileId={data.profile ? data.profile.id : ""}
+    />
+    </>
   );
 };

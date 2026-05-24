@@ -9,6 +9,7 @@ import { ProjectApplicationModule } from './models/project-application/project-a
 import { AiModule } from './models/ai/ai.module';
 import { RecommendationModule } from './models/recommendation/recommendation.module';
 import { AdminModule } from './models/admin/admin.module';
+import { FreelancerProfileModule } from './models/freelancer-profile/freelancerProfile.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AdminModule } from './models/admin/admin.module';
     AiModule,
     RecommendationModule,
     AdminModule,
+    FreelancerProfileModule,
   ],
   controllers: [],
   providers: [],
